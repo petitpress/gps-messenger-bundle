@@ -1,5 +1,7 @@
 services:
     PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory:
+        arguments:
+            $gpsConfigurationResolver: '@PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface'
         tags: [messenger.transport_factory]
 
     PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver: ~

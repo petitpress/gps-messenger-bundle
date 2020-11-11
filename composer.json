@@ -18,7 +18,8 @@
     "require": {
         "php": ">=7.4.0",
         "symfony/messenger": "^4.4|^5.1",
-        "symfony/options-resolver": "^4.4|^5.1"
+        "symfony/options-resolver": "^4.4|^5.1",
+        "google/cloud-pubsub": "^1.29"
     },
     "autoload": {
         "psr-4": { "PetitPress\\GpsMessengerBundle\\": "" }

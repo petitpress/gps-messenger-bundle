@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace PetitPress\GpsMessengerBundle\DependencyInjection;
+
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
