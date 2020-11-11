@@ -3,11 +3,11 @@ Google Pub/Sub transport implementation for Symfony Messenger
 
 This bundle provides a simple implementation of Google Pub/Sub transport for Symfony Messenger.
 
-The bundle requires only `symfony/messenger` and `symfony/options-resolver` packages. 
+The bundle requires only `symfony/messenger`, `google/cloud-pubsub` and `symfony/options-resolver` packages. 
 In contrast with [Enqueue GPS transport](https://github.com/php-enqueue/gps),
-it doesn't require [Enqueue](https://github.com/php-enqueue), 
+it doesn't require [Enqueue](https://github.com/php-enqueue) 
 and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme). 
-It supports ordering messages by `OrderingKeyStamp` and it's not outdated. 
+It supports ordering messages with `OrderingKeyStamp` and it's not outdated. 
 
 ## Installation
 

@@ -40,9 +40,8 @@ final class GpsSender implements SenderInterface
         $messageBuilder = new MessageBuilder();
         $messageBuilder = $messageBuilder->setData(json_encode($encodedMessage));
 
-        /** @var OrderingKeyStamp|null $orderingKeyStamp */
         $orderingKeyStamp = $envelope->last(OrderingKeyStamp::class);
-        if ($orderingKeyStamp) {
+        if ($orderingKeyStamp instanceof OrderingKeyStamp) {
             $messageBuilder->setOrderingKey($orderingKeyStamp->getOrderingKey());
         }
 
