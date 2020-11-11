@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Transport;
 
-use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use JsonException;
 use LogicException;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;

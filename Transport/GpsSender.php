@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Transport;
 
-use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Sender\SenderInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;

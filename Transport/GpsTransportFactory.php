@@ -14,9 +14,6 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  */
 final class GpsTransportFactory implements TransportFactoryInterface
 {
-    /**
-     * @var GpsConfigurationResolverInterface
-     */
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
 
     public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver)
