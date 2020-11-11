@@ -1,0 +1,26 @@
+{
+    "name": "petitpress/gps-messenger-bundle",
+    "type": "symfony-bundle",
+    "description": "Google Pub/Sub transport for Symfony Messenger",
+    "keywords": ["messenger", "symfony", "google", "pubsub"],
+    "homepage": "https://www.petitpress.sk",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ronald Marfoldi",
+            "email": "ronald.marfoldi@petitpress.sk"
+        },
+        {
+            "name": "Petit Press, a.s.",
+            "homepage": "https://www.petitpress.sk"
+        }
+    ],
+    "require": {
+        "php": ">=7.4.0",
+        "symfony/messenger": "^4.4|^5.1",
+        "symfony/options-resolver": "^4.4|^5.1"
+    },
+    "autoload": {
+        "psr-4": { "PetitPress\\GpsMessengerBundle\\": "" }
+    }
+}
