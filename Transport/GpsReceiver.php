@@ -74,15 +74,15 @@ final class GpsReceiver implements ReceiverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * It does nothing. We can't reject message in Google Pub/Sub.
+     * After the ack deadline passes and the message won't be acknowledged,
+     * Pub/Sub will try to redeliver the message according to set up retry policy.
+     *
+     * @see https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions#RetryPolicy
      */
     public function reject(Envelope $envelope): void
     {
-        try {
-            $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
-            $this->rejectMessageInPubSub($gpsReceivedStamp->getGpsMessage());
-        } catch (Throwable $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
-        }
     }
 
     private function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp
@@ -104,33 +104,15 @@ final class GpsReceiver implements ReceiverInterface
         try {
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
-            $this->rejectMessageInPubSub($message);
-
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
         try {
             $envelope = $this->serializer->decode($rawData);
         } catch (MessageDecodingFailedException $exception) {
-            $this->rejectMessageInPubSub($message);
-
             throw $exception;
         }
 
         return $envelope->with(new GpsReceivedStamp($message));
-    }
-
-    /**
-     * It does immediate NACK on the message documented by Google (modifying ack deadline for specific message to 0).
-     * Might not reject message for another pull, it depends on set retry policy.
-     *
-     * @see https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions#RetryPolicy
-     */
-    private function rejectMessageInPubSub(Message $message): void
-    {
-        $this->pubSubClient
-            ->subscription($this->gpsConfiguration->getSubscriptionName())
-            ->modifyAckDeadline($message, 0)
-        ;
     }
 }
