@@ -49,7 +49,6 @@ final class GpsReceiver implements ReceiverInterface
             foreach ($messages as $message) {
                 yield $this->createEnvelopeFromPubSubMessage($message);
             }
-
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
@@ -83,6 +82,16 @@ final class GpsReceiver implements ReceiverInterface
      */
     public function reject(Envelope $envelope): void
     {
+        try {
+            $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
+
+            $this->pubSubClient
+                ->subscription($this->gpsConfiguration->getSubscriptionName())
+                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0)
+            ;
+        } catch (Throwable $exception) {
+            throw new TransportException($exception->getMessage(), 0, $exception);
+        }
     }
 
     private function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp

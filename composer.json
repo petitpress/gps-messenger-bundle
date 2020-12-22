@@ -21,6 +21,12 @@
         "symfony/options-resolver": "^4.4|^5.1",
         "google/cloud-pubsub": "^1.29"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "phpspec/prophecy-phpunit": "^2.0",
+        "friendsofphp/php-cs-fixer": "^2.17",
+        "phpstan/phpstan": "^0.12.64"
+    },
     "autoload": {
         "psr-4": { "PetitPress\\GpsMessengerBundle\\": "" }
     }

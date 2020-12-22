@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Transport;
 
-use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
@@ -50,7 +50,7 @@ final class GpsSender implements SenderInterface
 
         $orderingKeyStamp = $envelope->last(OrderingKeyStamp::class);
         if ($orderingKeyStamp instanceof OrderingKeyStamp) {
-            $messageBuilder->setOrderingKey($orderingKeyStamp->getOrderingKey());
+            $messageBuilder = $messageBuilder->setOrderingKey($orderingKeyStamp->getOrderingKey());
         }
 
         $this->pubSubClient

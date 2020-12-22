@@ -1,0 +1,66 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.feature]
+indent_size = 2
+
+[*.js]
+indent_size = 2
+
+[*.json]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.sh]
+indent_style = tab
+
+[*.vcl]
+indent_size = 2
+
+[*.{yaml,yml}]
+trim_trailing_whitespace = false
+
+[api/helm/api/**.yaml]
+indent_size = 2
+
+[.github/workflows/*.yml]
+indent_style = space
+indent_size = 2
+
+[.gitmodules]
+indent_style = tab
+
+[.php_cs{,.dist}]
+indent_style = space
+indent_size = 4
+
+[.travis.yml]
+indent_size = 2
+
+[composer.json]
+indent_size = 4
+
+[docker-compose{,.*}.{yaml,yml}]
+indent_style = space
+indent_size = 2
+
+[Dockerfile]
+indent_style = tab
+
+[phpunit.xml{,.dist}]
+indent_style = space
+indent_size = 4
