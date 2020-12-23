@@ -72,11 +72,10 @@ final class GpsReceiver implements ReceiverInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Called when handling the message failed and allows to warn PUB/SUB not to wait the ack.
+     * After warning PUB/SUB, it will try to redeliver the message according to set up retry policy.
      *
-     * It does nothing. We can't reject message in Google Pub/Sub.
-     * After the ack deadline passes and the message won't be acknowledged,
-     * Pub/Sub will try to redeliver the message according to set up retry policy.
+     * @throws TransportException If there is an issue communicating with the transport
      *
      * @see https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions#RetryPolicy
      */
