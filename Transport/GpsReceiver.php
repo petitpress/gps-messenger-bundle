@@ -8,6 +8,7 @@ use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use JsonException;
 use LogicException;
+use PetitPress\GpsMessengerBundle\Message\CustomMessage;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
@@ -113,6 +114,10 @@ final class GpsReceiver implements ReceiverInterface
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
+        }
+
+        if (isset($rawData['customMessage'])) {
+            return new Envelope((new CustomMessage($rawData)), [new GpsReceivedStamp($message)]);
         }
 
         try {
