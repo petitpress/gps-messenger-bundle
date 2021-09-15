@@ -14,6 +14,10 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  */
 final class GpsTransportFactory implements TransportFactoryInterface
 {
+    const GOOGLE_APPLICATION_CREDENTIALS = 'GOOGLE_APPLICATION_CREDENTIALS';
+    const GOOGLE_CLOUD_PROJECT = 'GOOGLE_CLOUD_PROJECT';
+    const PUBSUB_EMULATOR_HOST = 'PUBSUB_EMULATOR_HOST';
+
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
 
     public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver)
@@ -26,11 +30,30 @@ final class GpsTransportFactory implements TransportFactoryInterface
      */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
+        $this->resolvePubSubEnvOptions($options);
+
         return new GpsTransport(
             new PubSubClient(),
             $this->gpsConfigurationResolver->resolve($dsn, $options),
             $serializer
         );
+    }
+
+    protected function resolvePubSubEnvOptions(array &$options): void
+    {
+        $envMap = [
+            'projectId' => self::GOOGLE_CLOUD_PROJECT,
+            'emulatorHost' => self::PUBSUB_EMULATOR_HOST,
+            'keyFilePath' => self::GOOGLE_APPLICATION_CREDENTIALS
+        ];
+
+        foreach ($envMap as $optKey => $envKey) {
+            if ($options[$optKey]) {
+                putenv($envKey . '=' . $options[$optKey]);
+                unset($options[$optKey]);
+            }
+        }
+
     }
 
     /**

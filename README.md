@@ -24,8 +24,10 @@ $ composer require petitpress/gps-messenger-bundle --no-scripts
 Official [Google Cloud PubSub SDK](https://github.com/googleapis/google-cloud-php-pubsub) 
 requires some globally accessible environment variables.
 
-You might need to change default Symfony DotEnv instance to use `putenv` 
-as Google needs to access some variables through `getenv`. To do so, use putenv method in `config/bootstrap.php`:
+If you want to provide the PubSub authentication info through environment variables
+you might need to change default Symfony DotEnv instance to use `putenv` 
+as Google needs to access some variables through `getenv`. To do so, use putenv method in `config/bootstrap.php` 
+(does no longer exist in Symfony 5.3 and above):
 ```php
 (new Dotenv())->usePutenv()->...
 ```
@@ -34,11 +36,14 @@ List of Google Pub/Sub configurable variables :
 ```dotenv
 # use these for production environemnt:
 GOOGLE_APPLICATION_CREDENTIALS='google-pubsub-credentials.json'
-GCLOUD_PROJECT='project-id'
+GOOGLE_CLOUD_PROJECT='project-id'
 
 # use these for development environemnt (if you have installed Pub/Sub emulator):
 PUBSUB_EMULATOR_HOST=http://localhost:8538
 ```
+
+If you want to use the bundle with Symfony Version 5.3 and above you need to configure those variables 
+inside the `config/packages/messenger.yaml`.
 
 ### Step 3: Configure Symfony Messenger
 ```yaml
@@ -55,6 +60,13 @@ framework:
                         name: 'messages'
                     queue: # optional (default the same as topic.name)
                         name: 'messages'
+                        
+                    # optional (see google-cloud-php-pubsub documentation on GOOGLE_APPLICATION_CREDENTIALS)
+                    keyFilePath: '%env(GOOGLE_APPLICATION_CREDENTIALS)%'
+                    # optional (see google-cloud-php-pubsub documentation on PUBSUB_EMULATOR_HOST)
+                    emulatorHost: '%env(PUBSUB_EMULATOR_HOST)%'
+                    # mandatory (see google-cloud-php-pubsub documentation on GOOGLE_CLOUD_PROJECT)
+                    projectId: '%env(GOOGLE_CLOUD_PROJECT)%'
 ```
 or:
 ```yaml
