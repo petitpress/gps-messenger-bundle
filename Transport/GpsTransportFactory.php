@@ -48,7 +48,7 @@ final class GpsTransportFactory implements TransportFactoryInterface
         ];
 
         foreach ($envMap as $optKey => $envKey) {
-            if (key_exists($optKey, $options)) {
+            if (array_key_exists($optKey, $options)) {
                 if (!empty($options[$optKey])) {
                     putenv($envKey . '=' . $options[$optKey]);
                 }
