@@ -48,12 +48,13 @@ final class GpsTransportFactory implements TransportFactoryInterface
         ];
 
         foreach ($envMap as $optKey => $envKey) {
-            if ($options[$optKey]) {
-                putenv($envKey . '=' . $options[$optKey]);
+            if (key_exists($optKey, $options)) {
+                if (!empty($options[$optKey])) {
+                    putenv($envKey . '=' . $options[$optKey]);
+                }
                 unset($options[$optKey]);
             }
         }
-
     }
 
     /**
