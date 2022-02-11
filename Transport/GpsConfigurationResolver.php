@@ -22,6 +22,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         $optionsResolver = new OptionsResolver();
         $optionsResolver
+            ->setDefault('client_config', [])
             ->setDefault('max_messages_pull', self::DEFAULT_MAX_MESSAGES_PULL)
             ->setDefault('topic', static function (OptionsResolver $topicResolver): void {
                 $topicResolver
@@ -39,6 +40,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                 return ((int) filter_var($value, FILTER_SANITIZE_NUMBER_INT)) ?: null;
             })
             ->setAllowedTypes('max_messages_pull', ['int', 'string'])
+            ->setAllowedTypes('client_config', 'array')
         ;
 
         $dnsOptions = [];
@@ -60,6 +62,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $resolvedOptions['topic']['name'],
             $resolvedOptions['queue']['name'],
             $resolvedOptions['max_messages_pull'],
+            $resolvedOptions['client_config'],
         );
     }
 }

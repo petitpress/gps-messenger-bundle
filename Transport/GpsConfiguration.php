@@ -12,12 +12,18 @@ final class GpsConfiguration implements GpsConfigurationInterface
     private string $queueName;
     private string $subscriptionName;
     private int $maxMessagesPull;
+    private array $clientConfig;
 
-    public function __construct(string $queueName, string $subscriptionName, int $maxMessagesPull)
-    {
+    public function __construct(
+        string $queueName,
+        string $subscriptionName,
+        int $maxMessagesPull,
+        array $clientConfig
+    ) {
         $this->queueName = $queueName;
         $this->subscriptionName = $subscriptionName;
         $this->maxMessagesPull = $maxMessagesPull;
+        $this->clientConfig = $clientConfig;
     }
 
     public function getQueueName(): string
@@ -33,5 +39,10 @@ final class GpsConfiguration implements GpsConfigurationInterface
     public function getMaxMessagesPull(): int
     {
         return $this->maxMessagesPull;
+    }
+
+    public function getClientConfig(): array
+    {
+        return $this->clientConfig;
     }
 }

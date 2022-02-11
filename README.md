@@ -50,6 +50,8 @@ framework:
             gps_transport:
                 dsn: 'gps://default'
                 options:
+                    client_config: # optional (default: [])
+                        apiEndpoint: 'https://europe-west3-pubsub.googleapis.com'
                     max_messages_pull: 10 # optional (default: 10)
                     topic: # optional (default name: messages)
                         name: 'messages'
@@ -64,7 +66,7 @@ framework:
     messenger:
         transports:
             gps_transport:
-                dsn: 'gps://default/messages?max_messages_pull=10'
+                dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&max_messages_pull=10'
 ```
 
 ### Step 4: Use available stamps if needed

@@ -26,9 +26,11 @@ final class GpsTransportFactory implements TransportFactoryInterface
      */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
+        $options = $this->gpsConfigurationResolver->resolve($dsn, $options);
+
         return new GpsTransport(
-            new PubSubClient(),
-            $this->gpsConfigurationResolver->resolve($dsn, $options),
+            new PubSubClient($options->getClientConfig()),
+            $options,
             $serializer
         );
     }
