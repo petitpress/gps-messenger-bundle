@@ -73,3 +73,8 @@ framework:
 
 * `OrderingKeyStamp`: use for keeping messages of the same context in order. 
   For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using_ordering_keys). 
+
+### Step 5: Create topics from config
+```bash
+bin/console messenger:setup-transports
+```
