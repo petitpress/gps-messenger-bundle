@@ -23,9 +23,20 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 class GpsTransportTest extends TestCase
 {
-    private GpsTransport $subject;
-    private PubSubClient $pubSubClient;
-    private GpsConfigurationInterface $gpsConfiguration;
+    /**
+     * @var GpsTransport|MockObject
+     */
+    private $subject;
+
+    /**
+     * @var PubSubClient|MockObject
+     */
+    private $pubSubClient;
+    
+    /**
+     * @var GpsConfigurationInterface|MockObject
+     */
+    private $gpsConfiguration;
 
     /**
      * @var SerializerInterface|MockObject
@@ -69,27 +80,31 @@ class GpsTransportTest extends TestCase
     public function testSend(): void
     {
         $transportConfiguration = new GpsReceivedStamp(
-            new Message([
-                'data' => '{}',
-                'messageId' => 'messageId',
-                'publishTime' => time(),
-                'attributes' => [],
-                'orderingKey' => null
-            ])
+            new Message(
+                [
+                    'data' => '{}',
+                    'messageId' => 'messageId',
+                    'publishTime' => time(),
+                    'attributes' => [],
+                    'orderingKey' => null,
+                ]
+            )
         );
 
         $message = new stdClass();
         $message->prop = 'test';
 
-        $envelope = new Envelope(new stdClass(), [$transportConfiguration]);
+        $envelope = new Envelope($message, [$transportConfiguration]);
 
         $this->serializerMock
             ->expects($this->once())
             ->method('encode')
-            ->willReturn([
-                'body' => '{}',
-                'headers' => []
-            ]);
+            ->willReturn(
+                [
+                    'body' => '{}',
+                    'headers' => [],
+                ]
+            );
 
         $topicMock = $this->createMock(Topic::class);
         $topicMock
@@ -125,7 +140,6 @@ class GpsTransportTest extends TestCase
             ->expects($this->once())
             ->method('exists')
             ->willReturn(false);
-
 
         $subscriptionMock = $this->createMock(Subscription::class);
         $subscriptionMock
