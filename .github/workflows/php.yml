@@ -31,7 +31,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Run style tests
-        run: vendor/bin/php-cs-fixer fix --dry-run
+        run: vendor/bin/php-cs-fixer fix --dry-run -v --diff
         
       - name: Run static analyse tests
         run: vendor/bin/phpstan analyse Tests Transport --level=5
