@@ -5,7 +5,7 @@ $finder = PhpCsFixer\Finder::create()
     ->exclude('vendor')
 ;
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@PHP74Migration' => true,
@@ -44,18 +44,19 @@ return PhpCsFixer\Config::create()
         'no_useless_else' => true,
         'no_useless_return' => true,
         'ordered_imports' => [
-            'importsOrder' => [
+            'imports_order' => [
                 'class',
                 'function',
                 'const',
             ],
-            'sortAlgorithm' => 'alpha',
+            'sort_algorithm' => 'alpha',
         ],
         'phpdoc_align' => [
             'align' => 'left'
         ],
         'phpdoc_order' => true,
-        'psr4' => true,
+        'psr_autoloading' => true,
+        'no_unused_imports' => true,
         'semicolon_after_instruction' => true,
         'strict_comparison' => true,
         'strict_param' => true,
