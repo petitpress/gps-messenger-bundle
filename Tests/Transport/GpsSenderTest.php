@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Tests\Transport;
 
-use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Topic;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
@@ -14,9 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
-use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
-use Symfony\Component\Messenger\Stamp\StampInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 /**
@@ -73,7 +70,7 @@ class GpsSenderTest extends TestCase
         $this->pubSubClientProphecy->topic(self::TOPIC_NAME)->willReturn($this->topicProphecy->reveal())->shouldBeCalledOnce();
 
         $this->topicProphecy->publish(Argument::allOf(
-            new Argument\Token\ObjectStateToken('data', \json_encode($envelopeArray)),
+            new Argument\Token\ObjectStateToken('data', json_encode($envelopeArray)),
             new Argument\Token\ObjectStateToken('orderingKey', self::ORDERED_KEY),
         ))->shouldBeCalledOnce();
 
@@ -92,7 +89,7 @@ class GpsSenderTest extends TestCase
         $this->pubSubClientProphecy->topic(self::TOPIC_NAME)->willReturn($this->topicProphecy->reveal())->shouldBeCalledOnce();
 
         $this->topicProphecy->publish(Argument::allOf(
-            new Argument\Token\ObjectStateToken('data', \json_encode($envelopeArray)),
+            new Argument\Token\ObjectStateToken('data', json_encode($envelopeArray)),
             new Argument\Token\ObjectStateToken('orderingKey', null),
         ))->shouldBeCalledOnce();
 

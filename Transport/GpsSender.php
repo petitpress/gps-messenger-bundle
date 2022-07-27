@@ -8,7 +8,6 @@ use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\Sender\SenderInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
