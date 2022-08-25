@@ -37,6 +37,8 @@ final class GpsReceiver implements ReceiverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @psalm-suppress InvalidReturnType
      */
     public function get(): iterable
     {

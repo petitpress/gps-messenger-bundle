@@ -27,7 +27,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         // not relevant options for transport itself
         unset($options['transport_name'], $options['serializer']);
 
-        $subscriptionOptionsNormalizer = static function (Options $options, $data): array {
+        $subscriptionOptionsNormalizer = static function (Options $options, $data) {
             foreach ($data ?? [] as $optionName => $optionValue) {
                 switch ($optionName) {
                     case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_OPTIONS[self::INT_NORMALIZER_KEY], true):

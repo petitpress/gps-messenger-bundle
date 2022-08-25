@@ -64,6 +64,7 @@ final class GpsTransport implements TransportInterface
 
     public function getReceiver(): GpsReceiver
     {
+        /** @psalm-suppress RedundantPropertyInitializationCheck */
         if (isset($this->receiver)) {
             return $this->receiver;
         }
@@ -75,6 +76,7 @@ final class GpsTransport implements TransportInterface
 
     public function getSender(): GpsSender
     {
+        /** @psalm-suppress RedundantPropertyInitializationCheck */
         if (isset($this->sender)) {
             return $this->sender;
         }

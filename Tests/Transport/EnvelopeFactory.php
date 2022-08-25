@@ -12,8 +12,8 @@ use Symfony\Component\Messenger\Stamp\StampInterface;
  */
 class EnvelopeFactory
 {
-    public static function create(?StampInterface ...$stamps): Envelope
+    public static function create(StampInterface ...$stamps): Envelope
     {
-        return new Envelope(new \stdClass(), $stamps ?: []);
+        return new Envelope(new \stdClass(), $stamps);
     }
 }
