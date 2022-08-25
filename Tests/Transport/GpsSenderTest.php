@@ -4,56 +4,78 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Tests\Transport;
 
+use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Topic;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsSender;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Prophecy\Argument;
-use Prophecy\PhpUnit\ProphecyTrait;
-use Prophecy\Prophecy\ObjectProphecy;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 /**
  * @author Mickael Prévôt <mickael.prevot@ext.adeo.com>
+ * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
 class GpsSenderTest extends TestCase
 {
-    use ProphecyTrait;
-
     private const ORDERED_KEY = 'ordered-key';
     private const TOPIC_NAME = 'topic-name';
 
-    private ObjectProphecy $gpsConfigurationProphecy;
+    /**
+     * @var GpsConfigurationInterface&MockObject
+     */
+    private MockObject $gpsConfigurationMock;
+
+    /**
+     * @var PubSubClient&MockObject
+     */
+    private MockObject $pubSubClientMock;
+
+    /**
+     * @var SerializerInterface&MockObject
+     */
+    private MockObject $serializerMock;
+
+    /**
+     * @var Topic&MockObject
+     */
+    private MockObject $topicMock;
+
     private GpsSender $gpsSender;
-    private ObjectProphecy $pubSubClientProphecy;
-    private ObjectProphecy $serializerProphecy;
-    private ObjectProphecy $topicProphecy;
 
     protected function setUp(): void
     {
-        $this->gpsConfigurationProphecy = $this->prophesize(GpsConfigurationInterface::class);
-        $this->pubSubClientProphecy = $this->prophesize(PubSubClient::class);
-        $this->serializerProphecy = $this->prophesize(SerializerInterface::class);
-        $this->topicProphecy = $this->prophesize(Topic::class);
+        $this->gpsConfigurationMock = $this->createMock(GpsConfigurationInterface::class);
+        $this->pubSubClientMock = $this->createMock(PubSubClient::class);
+        $this->serializerMock = $this->createMock(SerializerInterface::class);
+        $this->topicMock = $this->createMock(Topic::class);
 
         $this->gpsSender = new GpsSender(
-            $this->pubSubClientProphecy->reveal(),
-            $this->gpsConfigurationProphecy->reveal(),
-            $this->serializerProphecy->reveal(),
+            $this->pubSubClientMock,
+            $this->gpsConfigurationMock,
+            $this->serializerMock,
         );
     }
 
-    public function testItDoesNotPublishIfTheLastStampIsOfTyeRedelivery(): void
+    public function testItDoesNotPublishIfTheLastStampIsOfTypeRedelivery(): void
     {
         $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
         $envelopeArray = ['body' => []];
 
-        $this->serializerProphecy->encode($envelope)->willReturn($envelopeArray)->shouldBeCalledOnce();
+        $this->serializerMock
+            ->expects($this->once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
 
-        $this->pubSubClientProphecy->topic(Argument::any())->shouldNotBeCalled();
+        $this->pubSubClientMock
+            ->expects($this->never())
+            ->method('topic')
+        ;
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
@@ -63,16 +85,36 @@ class GpsSenderTest extends TestCase
         $envelope = EnvelopeFactory::create(new OrderingKeyStamp(self::ORDERED_KEY));
         $envelopeArray = ['body' => []];
 
-        $this->serializerProphecy->encode($envelope)->willReturn($envelopeArray)->shouldBeCalledOnce();
+        $this->serializerMock
+            ->expects($this->once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
 
-        $this->gpsConfigurationProphecy->getQueueName()->willReturn(self::TOPIC_NAME)->shouldBeCalledOnce();
+        $this->gpsConfigurationMock
+            ->expects($this->once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
 
-        $this->pubSubClientProphecy->topic(self::TOPIC_NAME)->willReturn($this->topicProphecy->reveal())->shouldBeCalledOnce();
+        $this->topicMock
+            ->expects($this->once())
+            ->method('exists')
+            ->willReturn(true)
+        ;
 
-        $this->topicProphecy->publish(Argument::allOf(
-            new Argument\Token\ObjectStateToken('data', json_encode($envelopeArray)),
-            new Argument\Token\ObjectStateToken('orderingKey', self::ORDERED_KEY),
-        ))->shouldBeCalledOnce();
+        $this->topicMock
+            ->expects($this->once())
+            ->method('publish')
+            ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => self::ORDERED_KEY]))
+        ;
+
+        $this->pubSubClientMock
+            ->expects($this->once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock);
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
@@ -82,16 +124,37 @@ class GpsSenderTest extends TestCase
         $envelope = EnvelopeFactory::create();
         $envelopeArray = ['body' => []];
 
-        $this->serializerProphecy->encode($envelope)->willReturn($envelopeArray)->shouldBeCalledOnce();
+        $this->serializerMock
+            ->expects($this->once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
 
-        $this->gpsConfigurationProphecy->getQueueName()->willReturn(self::TOPIC_NAME)->shouldBeCalledOnce();
+        $this->gpsConfigurationMock
+            ->expects($this->once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
 
-        $this->pubSubClientProphecy->topic(self::TOPIC_NAME)->willReturn($this->topicProphecy->reveal())->shouldBeCalledOnce();
+        $this->topicMock
+            ->expects($this->once())
+            ->method('exists')
+            ->willReturn(true)
+        ;
 
-        $this->topicProphecy->publish(Argument::allOf(
-            new Argument\Token\ObjectStateToken('data', json_encode($envelopeArray)),
-            new Argument\Token\ObjectStateToken('orderingKey', null),
-        ))->shouldBeCalledOnce();
+        $this->topicMock
+            ->expects($this->once())
+            ->method('publish')
+            ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => null]))
+        ;
+
+        $this->pubSubClientMock
+            ->expects($this->once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock)
+        ;
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
