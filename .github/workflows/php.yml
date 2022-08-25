@@ -34,7 +34,7 @@ jobs:
         run: vendor/bin/php-cs-fixer fix --dry-run
         
       - name: Run static analyse tests
-        run: vendor/bin/phpstan analyse Tests Transport --level=5
+        run: vendor/bin/phpstan analyse
         
       - name: Run unit tests
         run: vendor/bin/phpunit
