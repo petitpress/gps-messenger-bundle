@@ -52,11 +52,10 @@ final class GpsSender implements SenderInterface
             $messageBuilder = $messageBuilder->setOrderingKey($orderingKeyStamp->getOrderingKey());
         }
 
-        $topic = $this->pubSubClient->topic($this->gpsConfiguration->getTopicName());
-        if (false === $topic->exists()) {
-            $topic->create($this->gpsConfiguration->getTopicOptions());
-        }
-        $topic->publish($messageBuilder->build());
+        $this->pubSubClient
+            ->topic($this->gpsConfiguration->getTopicName())
+            ->publish($messageBuilder->build())
+        ;
 
         return $envelope;
     }

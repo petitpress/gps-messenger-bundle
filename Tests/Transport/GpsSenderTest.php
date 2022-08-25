@@ -100,12 +100,6 @@ class GpsSenderTest extends TestCase
 
         $this->topicMock
             ->expects($this->once())
-            ->method('exists')
-            ->willReturn(true)
-        ;
-
-        $this->topicMock
-            ->expects($this->once())
             ->method('publish')
             ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => self::ORDERED_KEY]))
         ;
@@ -135,12 +129,6 @@ class GpsSenderTest extends TestCase
             ->expects($this->once())
             ->method('getTopicName')
             ->willReturn(self::TOPIC_NAME)
-        ;
-
-        $this->topicMock
-            ->expects($this->once())
-            ->method('exists')
-            ->willReturn(true)
         ;
 
         $this->topicMock

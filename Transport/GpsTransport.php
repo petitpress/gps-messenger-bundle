@@ -7,12 +7,13 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 use Google\Cloud\PubSub\PubSubClient;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
+use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsTransport implements TransportInterface
+final class GpsTransport implements TransportInterface, SetupableTransportInterface
 {
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
@@ -84,5 +85,26 @@ final class GpsTransport implements TransportInterface
         $this->sender = new GpsSender($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
 
         return $this->sender;
+    }
+
+    public function setup(): void
+    {
+        $topic = $this->pubSubClient->topic($this->gpsConfiguration->getTopicName());
+
+        if (false === $topic->exists()) {
+            $topic = $this->pubSubClient->createTopic(
+                $this->gpsConfiguration->getTopicName(),
+                $this->gpsConfiguration->getTopicOptions()
+            );
+        }
+
+        $subscription = $topic->subscription($this->gpsConfiguration->getSubscriptionName());
+
+        if (false === $subscription->exists()) {
+            $topic->subscribe(
+                $this->gpsConfiguration->getSubscriptionName(),
+                $this->gpsConfiguration->getSubscriptionOptions()
+            );
+        }
     }
 }
