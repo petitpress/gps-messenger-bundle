@@ -24,8 +24,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
-        "friendsofphp/php-cs-fixer": "^3.9",
-        "vimeo/psalm": "^4.26"
+        "vimeo/psalm": "^4.26",
+        "symplify/easy-coding-standard": "^11.1"
     },
     "autoload": {
         "psr-4": { "PetitPress\\GpsMessengerBundle\\": "" }
