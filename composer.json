@@ -17,15 +17,15 @@
     ],
     "require": {
         "php": ">=7.4.0",
+        "ext-json": "*",
         "symfony/messenger": "^4.4|^5.1|^6.0",
         "symfony/options-resolver": "^4.4|^5.1|^6.0",
         "google/cloud-pubsub": "^1.29"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",
-        "phpspec/prophecy-phpunit": "^2.0",
-        "friendsofphp/php-cs-fixer": "^3.9",
-        "phpstan/phpstan": "^0.12.64"
+        "vimeo/psalm": "^4.26",
+        "symplify/easy-coding-standard": "^11.1"
     },
     "autoload": {
         "psr-4": { "PetitPress\\GpsMessengerBundle\\": "" }

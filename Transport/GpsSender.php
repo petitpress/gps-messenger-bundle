@@ -53,7 +53,7 @@ final class GpsSender implements SenderInterface
         }
 
         $this->pubSubClient
-            ->topic($this->gpsConfiguration->getQueueName())
+            ->topic($this->gpsConfiguration->getTopicName())
             ->publish($messageBuilder->build())
         ;
 

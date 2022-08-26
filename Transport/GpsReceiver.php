@@ -37,14 +37,15 @@ final class GpsReceiver implements ReceiverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * @psalm-suppress InvalidReturnType
      */
     public function get(): iterable
     {
         try {
             $messages = $this->pubSubClient
                 ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->pull(['maxMessages' => $this->gpsConfiguration->getMaxMessagesPull()])
-            ;
+                ->pull(['maxMessages' => $this->gpsConfiguration->getMaxMessagesPull()]);
 
             foreach ($messages as $message) {
                 yield $this->createEnvelopeFromPubSubMessage($message);

@@ -11,13 +11,12 @@ use PHPUnit\Framework\TestCase;
 class GpsTransportFactoryTest extends TestCase
 {
     private GpsTransportFactory $subject;
-    private GpsConfigurationResolverInterface $gpsConfigurationResolver;
 
     protected function setUp(): void
     {
-        $this->gpsConfigurationResolver = $this->createMock(GpsConfigurationResolverInterface::class);
-
-        $this->subject = new GpsTransportFactory($this->gpsConfigurationResolver);
+        $this->subject = new GpsTransportFactory(
+            $this->createMock(GpsConfigurationResolverInterface::class)
+        );
     }
 
     /**

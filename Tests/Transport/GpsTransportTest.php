@@ -24,24 +24,23 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 class GpsTransportTest extends TestCase
 {
     /**
-     * @var GpsTransport|MockObject
      */
-    private $subject;
+    private GpsTransport $subject;
 
     /**
-     * @var PubSubClient|MockObject
+     * @var PubSubClient&MockObject
      */
-    private $pubSubClient;
-    
-    /**
-     * @var GpsConfigurationInterface|MockObject
-     */
-    private $gpsConfiguration;
+    private MockObject $pubSubClient;
 
     /**
-     * @var SerializerInterface|MockObject
+     * @var GpsConfigurationInterface&MockObject
      */
-    private $serializerMock;
+    private MockObject $gpsConfiguration;
+
+    /**
+     * @var SerializerInterface&MockObject
+     */
+    private MockObject $serializerMock;
 
     protected function setUp(): void
     {
@@ -127,7 +126,7 @@ class GpsTransportTest extends TestCase
 
         $this->gpsConfiguration
             ->expects($this->atLeast(2))
-            ->method('getQueueName')
+            ->method('getTopicName')
             ->willReturn($queue);
 
         $this->gpsConfiguration

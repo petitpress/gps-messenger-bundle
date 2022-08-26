@@ -55,8 +55,18 @@ framework:
                     max_messages_pull: 10 # optional (default: 10)
                     topic: # optional (default name: messages)
                         name: 'messages'
-                    queue: # optional (default the same as topic.name)
+                        options: # optional create options if not exists (default: []), for all options take at look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/topic?method=create
+                            labels:
+                                - label1
+                                - label2
+                    subscription: # optional (default the same as topic.name)
                         name: 'messages'
+                        options: # optional create options if not exists (default: []), fol all options take a look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/subscription?method=create
+                            enableExactlyOnceDelivery: true
+                            labels:
+                                - label1
+                                - label2
+                            
 ```
 or:
 ```yaml

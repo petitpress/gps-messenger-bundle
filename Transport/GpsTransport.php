@@ -65,6 +65,7 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
 
     public function getReceiver(): GpsReceiver
     {
+        /** @psalm-suppress RedundantPropertyInitializationCheck */
         if (isset($this->receiver)) {
             return $this->receiver;
         }
@@ -76,6 +77,7 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
 
     public function getSender(): GpsSender
     {
+        /** @psalm-suppress RedundantPropertyInitializationCheck */
         if (isset($this->sender)) {
             return $this->sender;
         }
@@ -87,16 +89,22 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
 
     public function setup(): void
     {
-        $topic = $this->pubSubClient->topic($this->gpsConfiguration->getQueueName());
+        $topic = $this->pubSubClient->topic($this->gpsConfiguration->getTopicName());
 
         if (false === $topic->exists()) {
-            $topic = $this->pubSubClient->createTopic($this->gpsConfiguration->getQueueName());
+            $topic = $this->pubSubClient->createTopic(
+                $this->gpsConfiguration->getTopicName(),
+                $this->gpsConfiguration->getTopicOptions()
+            );
         }
 
         $subscription = $topic->subscription($this->gpsConfiguration->getSubscriptionName());
 
         if (false === $subscription->exists()) {
-            $topic->subscribe($this->gpsConfiguration->getSubscriptionName());
+            $topic->subscribe(
+                $this->gpsConfiguration->getSubscriptionName(),
+                $this->gpsConfiguration->getSubscriptionOptions()
+            );
         }
     }
 }
