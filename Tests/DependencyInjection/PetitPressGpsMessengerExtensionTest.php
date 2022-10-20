@@ -68,4 +68,29 @@ EOF;
 
         return (new Parser())->parse($yaml);
     }
+
+
+    public function testConfigurationWithDisabledAuthCache(): void
+    {
+        $this->configuration = new ContainerBuilder();
+        $loader = new PetitPressGpsMessengerExtension();
+        $config = $this->getDisabledCacheConfig();
+        $loader->load([$config], $this->configuration);
+
+        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
+        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
+        $this->assertNull($gpsTransportFactoryDefinition->getArgument(1));
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getDisabledCacheConfig()
+    {
+        $yaml = <<<EOF
+auth_cache: false
+EOF;
+
+        return (new Parser())->parse($yaml);
+    }
 }

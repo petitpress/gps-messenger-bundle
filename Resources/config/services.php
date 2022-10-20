@@ -13,7 +13,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->set(GpsTransportFactory::class)
         ->args([
             new ReferenceConfigurator(GpsConfigurationResolverInterface::class),
-            // cache pool will be injected based on the configuration
+            null
         ])
         ->tag('messenger.transport_factory')
 

@@ -16,9 +16,9 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 final class GpsTransportFactory implements TransportFactoryInterface
 {
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
-    private CacheItemPoolInterface $cache;
+    private ?CacheItemPoolInterface $cache;
 
-    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver, CacheItemPoolInterface $cache)
+    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver, ?CacheItemPoolInterface $cache)
     {
         $this->gpsConfigurationResolver = $gpsConfigurationResolver;
         $this->cache = $cache;
@@ -32,7 +32,7 @@ final class GpsTransportFactory implements TransportFactoryInterface
         $options = $this->gpsConfigurationResolver->resolve($dsn, $options);
 
         $clientConfig = $options->getClientConfig();
-        if (! isset($clientConfig['authCache'])) {
+        if (null !== $this->cache && ! isset($clientConfig['authCache'])) {
             $clientConfig['authCache'] = $this->cache;
         }
 
