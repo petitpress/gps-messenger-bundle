@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PetitPress\GpsMessengerBundle\Transport;
 
 use Google\Cloud\PubSub\PubSubClient;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -15,10 +16,12 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 final class GpsTransportFactory implements TransportFactoryInterface
 {
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
+    private CacheItemPoolInterface $cache;
 
-    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver)
+    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver, CacheItemPoolInterface $cache)
     {
         $this->gpsConfigurationResolver = $gpsConfigurationResolver;
+        $this->cache = $cache;
     }
 
     /**
@@ -28,8 +31,13 @@ final class GpsTransportFactory implements TransportFactoryInterface
     {
         $options = $this->gpsConfigurationResolver->resolve($dsn, $options);
 
+        $clientConfig = $options->getClientConfig();
+        if (! isset($clientConfig['authCache'])) {
+            $clientConfig['authCache'] = $this->cache;
+        }
+
         return new GpsTransport(
-            new PubSubClient($options->getClientConfig()),
+            new PubSubClient($clientConfig),
             $options,
             $serializer
         );

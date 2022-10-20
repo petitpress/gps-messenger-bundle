@@ -79,12 +79,23 @@ framework:
                 dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&max_messages_pull=10'
 ```
 
-### Step 4: Use available stamps if needed
+### Step 4: Configure PetitPressGpsMessengerBundle (optional)
+
+Configure the cache service where authentication tokens are stored. The default is `cache.app`.
+
+```yaml
+# config/messenger/petit_press_gps_messenger.yaml
+
+petit_press_gps_messenger:
+    auth_cache: 'cache.app'
+```
+
+### Step 5: Use available stamps if needed
 
 * `OrderingKeyStamp`: use for keeping messages of the same context in order. 
   For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using_ordering_keys). 
 
-### Step 5: Create topics from config
+### Step 6: Create topics from config
 ```bash
 bin/console messenger:setup-transports
 ```

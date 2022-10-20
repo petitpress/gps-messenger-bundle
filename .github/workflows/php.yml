@@ -7,12 +7,20 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        php-version:
+          - '7.4'
+          - '8.0'
+          - '8.1'
+        platform: [ubuntu-latest]
+    name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: nanasess/setup-php@master
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php-version }}
 
       - name: Validate composer.json
         run: composer validate
@@ -22,13 +30,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.json') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-composer-
 
       - name: Install dependencies
         if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress --no-suggest --no-ansi --no-interaction --no-scripts
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv

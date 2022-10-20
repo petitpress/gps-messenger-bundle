@@ -7,6 +7,7 @@ namespace PetitPress\GpsMessengerBundle\Tests\Transport;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\CacheItemPoolInterface;
 
 class GpsTransportFactoryTest extends TestCase
 {
@@ -15,7 +16,8 @@ class GpsTransportFactoryTest extends TestCase
     protected function setUp(): void
     {
         $this->subject = new GpsTransportFactory(
-            $this->createMock(GpsConfigurationResolverInterface::class)
+            $this->createMock(GpsConfigurationResolverInterface::class),
+            $this->createMock(CacheItemPoolInterface::class)
         );
     }
 
