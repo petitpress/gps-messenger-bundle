@@ -84,7 +84,7 @@ framework:
 Configure the cache service where authentication tokens are stored. The default is `cache.app`.
 
 ```yaml
-# config/messenger/petit_press_gps_messenger.yaml
+# config/packages/petit_press_gps_messenger.yaml
 
 petit_press_gps_messenger:
     auth_cache: 'cache.app'
