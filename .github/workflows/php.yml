@@ -42,7 +42,7 @@ jobs:
         run: vendor/bin/ecs check -vv
         
       - name: Run static analyse tests
-        run: vendor/bin/psalm 
+        run: vendor/bin/psalm --php-version=${{ matrix.php-version }}
         
       - name: Run unit tests
         run: vendor/bin/phpunit
