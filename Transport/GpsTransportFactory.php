@@ -32,8 +32,8 @@ final class GpsTransportFactory implements TransportFactoryInterface
         $options = $this->gpsConfigurationResolver->resolve($dsn, $options);
 
         $clientConfig = $options->getClientConfig();
-        if (null !== $this->cache && ! isset($clientConfig['authCache'])) {
-            $clientConfig['authCache'] = $this->cache;
+        if ($this->cache instanceof CacheItemPoolInterface) {
+            $clientConfig['authCache'] ??= $this->cache;
         }
 
         return new GpsTransport(

@@ -11,7 +11,7 @@ final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('petit_press_gps_messenger', 'array');
+        $treeBuilder = new TreeBuilder('petit_press_gps_messenger');
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode
