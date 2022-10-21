@@ -116,12 +116,6 @@ final class GpsReceiver implements ReceiverInterface
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
-        try {
-            $envelope = $this->serializer->decode($rawData);
-        } catch (MessageDecodingFailedException $exception) {
-            throw $exception;
-        }
-
-        return $envelope->with(new GpsReceivedStamp($message));
+        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
     }
 }

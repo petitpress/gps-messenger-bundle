@@ -8,6 +8,7 @@ use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\Sender\SenderInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -39,7 +40,11 @@ final class GpsSender implements SenderInterface
         $encodedMessage = $this->serializer->encode($envelope);
 
         $messageBuilder = new MessageBuilder();
-        $messageBuilder = $messageBuilder->setData(json_encode($encodedMessage));
+        try {
+            $messageBuilder = $messageBuilder->setData(json_encode($encodedMessage, JSON_THROW_ON_ERROR));
+        } catch (\JsonException $exception) {
+            throw new TransportException($exception->getMessage(), 0, $exception);
+        }
 
         $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
         if ($redeliveryStamp instanceof RedeliveryStamp) {
