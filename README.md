@@ -36,7 +36,7 @@ List of Google Pub/Sub configurable variables :
 GOOGLE_APPLICATION_CREDENTIALS='google-pubsub-credentials.json'
 GCLOUD_PROJECT='project-id'
 
-# use these for development environemnt (if you have installed Pub/Sub emulator):
+# use these for development environment (if you have installed Pub/Sub emulator):
 PUBSUB_EMULATOR_HOST=http://localhost:8538
 ```
 
@@ -66,7 +66,6 @@ framework:
                             labels:
                                 - label1
                                 - label2
-                            
 ```
 or:
 ```yaml
@@ -78,6 +77,20 @@ framework:
             gps_transport:
                 dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&max_messages_pull=10'
 ```
+to use emulator in local:
+```yaml
+# config/packages/dev/messenger.yaml
+
+framework:
+    messenger:
+        transports:
+            gps_transport:
+                options:
+                    client_config:
+                        hasEmulator: true
+                        emulatorHost: '%env(PUBSUB_EMULATOR_HOST)%'
+```
+
 
 ### Step 4: Configure PetitPressGpsMessengerBundle (optional)
 
