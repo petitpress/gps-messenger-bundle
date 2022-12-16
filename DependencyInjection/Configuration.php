@@ -21,7 +21,13 @@ final class Configuration implements ConfigurationInterface
                     ->defaultValue('cache.app')
                     ->info('A cache for storing access tokens.')
                 ->end()
-            ->end();
+                ->enumNode('forced_transport')
+                    ->values(['grpc', 'rest'])
+                    ->defaultNull()
+                    ->info('A forced transport for all messenger transports.')
+                ->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }
