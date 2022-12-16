@@ -29,7 +29,7 @@ final class PetitPressGpsMessengerExtension extends Extension
             $gpsTransportFactoryDefinition->replaceArgument(1, new Reference($config['auth_cache']));
         }
         if (isset($config['forced_transport'])) {
-            $gpsTransportFactoryDefinition->replaceArgument(2, new Reference($config['forced_transport']));
+            $gpsTransportFactoryDefinition->replaceArgument(2, $config['forced_transport']);
         }
     }
 }
