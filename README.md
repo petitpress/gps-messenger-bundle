@@ -106,7 +106,11 @@ petit_press_gps_messenger:
 ### Step 5: Use available stamps if needed
 
 * `OrderingKeyStamp`: use for keeping messages of the same context in order. 
-  For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using_ordering_keys). 
+  For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using_ordering_keys).
+
+* `AttributesStamp`: use to add contextual metadata to serialized messages. 
+  For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using-attributes). 
+  Can be very useful when used together with [subscription filters](https://cloud.google.com/pubsub/docs/subscription-message-filter).
 
 ### Step 6: Create topics from config
 ```bash
