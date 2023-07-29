@@ -45,7 +45,7 @@ final class GpsReceiver implements ReceiverInterface
         try {
             $messages = $this->pubSubClient
                 ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->pull(['maxMessages' => $this->gpsConfiguration->getMaxMessagesPull()]);
+                ->pull($this->gpsConfiguration->getSubscriptionPullOptions());
 
             foreach ($messages as $message) {
                 yield $this->createEnvelopeFromPubSubMessage($message);
