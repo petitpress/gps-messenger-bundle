@@ -65,9 +65,12 @@ final class GpsSender implements SenderInterface
         }
 
         $senderOptionsStamp = $envelope->last(GpsSenderOptionsStamp::class);
+        if ($senderOptionsStamp instanceof GpsSenderOptionsStamp) {
+            $options = $senderOptionsStamp->getOptions();
+        }
         $this->pubSubClient
             ->topic($this->gpsConfiguration->getTopicName())
-            ->publish($messageBuilder->build(), $senderOptionsStamp)
+            ->publish($messageBuilder->build(), $options)
         ;
 
         return $envelope;

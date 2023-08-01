@@ -2,25 +2,27 @@
 
 namespace PetitPress\GpsMessengerBundle\Transport\Stamp;
 
+use Symfony\Component\Messenger\Stamp\NonSendableStampInterface;
+
 /**
  * @author Damien AVETTA-RAYMOND <damien.avetta@gmail.com>
  */
-class GpsSenderOptionsStamp
+class GpsSenderOptionsStamp implements NonSendableStampInterface
 {
     /**
-     * @var array<string, object>
+     * @var array<string, mixed>
      */
     private array $options;
 
     /**
-     * @param array<string, object> $options
+     * @param array<string, mixed> $options
      */
     public function __construct(array $options) {
         $this->options = $options;
     }
 
     /**
-     * @return array<string, object>
+     * @return array<string, mixed>
      */
     public function getOptions(): array
     {
