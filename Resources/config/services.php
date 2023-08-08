@@ -7,13 +7,15 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\Loader\Configurator\ReferenceConfigurator;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver;
+use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->services()
         ->set(GpsTransportFactory::class)
         ->args([
             new ReferenceConfigurator(GpsConfigurationResolverInterface::class),
-            null
+            null,
+            new ReferenceConfigurator(SerializerInterface::class),
         ])
         ->tag('messenger.transport_factory')
 

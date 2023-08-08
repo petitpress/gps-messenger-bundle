@@ -17,17 +17,19 @@ final class GpsTransportFactory implements TransportFactoryInterface
 {
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
     private ?CacheItemPoolInterface $cache;
+    private SerializerInterface $serializer;
 
-    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver, ?CacheItemPoolInterface $cache)
+    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver, ?CacheItemPoolInterface $cache, SerializerInterface $serializer)
     {
         $this->gpsConfigurationResolver = $gpsConfigurationResolver;
         $this->cache = $cache;
+        $this->serializer = $serializer;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
+    public function createTransport(string $dsn, array $options): TransportInterface
     {
         $options = $this->gpsConfigurationResolver->resolve($dsn, $options);
 

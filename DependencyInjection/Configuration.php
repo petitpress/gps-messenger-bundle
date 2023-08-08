@@ -12,7 +12,12 @@ final class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder('petit_press_gps_messenger');
-        $rootNode = $treeBuilder->getRootNode();
+        // Keep compatibility with symfony/config < 4.2
+        if (!method_exists($treeBuilder, 'getRootNode')) {
+            $rootNode = $treeBuilder->root('petit_press_gps_messenger');
+        } else {
+            $rootNode = $treeBuilder->getRootNode();
+        }
 
         $rootNode
             ->children()
