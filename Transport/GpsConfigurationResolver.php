@@ -43,72 +43,61 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         };
 
         $mergedOptions = $this->getMergedOptions($dsn, $options);
+        $resolvedOptions = [];
+
+        if (isset($mergedOptions['queue'])) {
+            // queue option is deprecated
+            $optionsResolver = new OptionsResolver();
+            $optionsResolver
+                ->setDefault('name', $mergedOptions['topic']['name'])
+                ->setDefault('options', [])
+                ->setAllowedTypes('name', 'string')
+                ->setAllowedTypes('options', 'array')
+                ->setNormalizer('options', $subscriptionOptionsNormalizer)
+            ;
+
+            $resolvedOptions['queue'] = $optionsResolver->resolve($mergedOptions['queue']);
+        }
 
         $optionsResolver = new OptionsResolver();
-        if (isset($mergedOptions['queue'])) {
-            $optionsResolver
-                ->setDefault(
-                    'queue',
-                    function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer): void {
-                        $resolver
-                            ->setDefault('name', $parentOptions['topic']['name'])
-                            ->setDefault('options', [])
-                            ->setAllowedTypes('name', 'string')
-                            ->setAllowedTypes('options', 'array')
-                            ->setNormalizer('options', $subscriptionOptionsNormalizer)
-                        ;
-                    }
-                )
-                ->setDeprecated(
-                    'queue',
-                    'petitpress/gps-messenger-bundle',
-                    '1.3.0',
-                    'The option "queue" is deprecated, use option "subscription" instead.'
-                )
-            ;
-        }
+        $optionsResolver
+            ->setDefault('name', self::DEFAULT_TOPIC_NAME)
+            ->setDefault('options', [])
+            ->setAllowedTypes('name', 'string')
+            ->setAllowedTypes('options', 'array');
+        $resolvedOptions['topic'] = $optionsResolver->resolve($mergedOptions['topic'] ?? []);
+
+
+        $resolvedOptions['subscription'] = $this->resolveSubscription(
+            $mergedOptions,
+            $subscriptionOptionsNormalizer
+        );
+
+
+        $optionsResolver = new OptionsResolver();
         $optionsResolver
             ->setDefault('client_config', [])
-            ->setDefault('max_messages_pull', self::DEFAULT_MAX_MESSAGES_PULL)
-            ->setDefault('topic', function (OptionsResolver $topicResolver): void {
-                $topicResolver
-                    ->setDefault('name', self::DEFAULT_TOPIC_NAME)
-                    ->setDefault('options', [])
-                    ->setAllowedTypes('name', 'string')
-                    ->setAllowedTypes('options', 'array')
-                ;
-            })
-            ->setDefault(
-                'subscription',
-                function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer): void {
-                    if ($parentOptions->offsetExists('queue')) {
-                        $resolver
-                            ->setDefault('name', $parentOptions['queue']['name'])
-                            ->setDefault('options', $parentOptions['queue']['options'])
-                            ->setAllowedTypes('name', 'string')
-                            ->setAllowedTypes('options', 'array')
-                        ;
-
-                        return;
-                    }
-
-                    $resolver
-                        ->setDefault('name', $parentOptions['topic']['name'])
-                        ->setDefault('options', [])
-                        ->setAllowedTypes('name', 'string')
-                        ->setAllowedTypes('options', 'array')
-                        ->setNormalizer('options', $subscriptionOptionsNormalizer);
+            ->setNormalizer('client_config', static function (Options $options, $value): array {
+                if (isset($value['keyFile']) && is_string($value['keyFile'])) {
+                    $value['keyFile'] = json_decode(base64_decode($value['keyFile']), true, 512, JSON_THROW_ON_ERROR);
                 }
-            )
+
+                $value['suppressKeyFileNotice'] = true;
+
+                return $value;
+            })
+            ->setDefault('max_messages_pull', self::DEFAULT_MAX_MESSAGES_PULL)
+            ->setDefault('topic', [])
+            ->setDefault('subscription', [])
             ->setNormalizer('max_messages_pull', static function (Options $options, $value): ?int {
                 return ((int) filter_var($value, FILTER_SANITIZE_NUMBER_INT)) ?: null;
             })
             ->setAllowedTypes('max_messages_pull', ['int', 'string'])
-            ->setAllowedTypes('client_config', 'array')
+            ->setAllowedTypes('topic', 'array')
+            ->setAllowedTypes('subscription', 'array')
         ;
 
-        $resolvedOptions = $optionsResolver->resolve($mergedOptions);
-
+        $resolvedOptions = array_merge($optionsResolver->resolve($mergedOptions), $resolvedOptions);
         return new GpsConfiguration(
             $resolvedOptions['topic']['name'],
             $resolvedOptions['subscription']['name'],
@@ -135,5 +124,27 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         }
 
         return array_merge($dnsOptions, $options);
+    }
+
+    private function resolveSubscription(array $mergedOptions, \Closure $subscriptionOptionsNormalizer): array
+    {
+        $optionsResolver = new OptionsResolver();
+        if (isset($mergedOptions['queue'])) {
+            $optionsResolver
+                ->setDefault('name', $mergedOptions['queue']['name'])
+                ->setDefault('options', $mergedOptions['queue']['options'])
+                ->setAllowedTypes('name', 'string')
+                ->setAllowedTypes('options', 'array');
+            return $optionsResolver->resolve($mergedOptions['subscription']);
+        }
+
+        $optionsResolver
+            ->setDefault('name', $mergedOptions['topic']['name'])
+            ->setDefault('options', [])
+            ->setAllowedTypes('name', 'string')
+            ->setAllowedTypes('options', 'array')
+            ->setNormalizer('options', $subscriptionOptionsNormalizer);
+
+        return $optionsResolver->resolve($mergedOptions['subscription'] ?? []);
     }
 }

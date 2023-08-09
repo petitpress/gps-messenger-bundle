@@ -24,6 +24,7 @@ final class GpsReceiver implements ReceiverInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+    private $shouldStop = false;
 
     public function __construct(
         PubSubClient $pubSubClient,
@@ -34,6 +35,38 @@ final class GpsReceiver implements ReceiverInterface
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
     }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function receive(callable $handler): void
+    {
+        while (!$this->shouldStop) {
+            $envelopes = $this->get();
+
+            foreach ($envelopes as $envelope) {
+                try {
+                    $handler($envelope);
+                    $this->ack($envelope);
+                } catch (\Throwable $throwable) {
+                    $this->reject($envelope);
+
+                    throw $throwable;
+                } finally {
+                    if (\function_exists('pcntl_signal_dispatch')) {
+                        pcntl_signal_dispatch();
+                    }
+                }
+            }
+        }
+    }
+
+    public function stop(): void
+    {
+        $this->shouldStop = true;
+    }
+
 
     /**
      * {@inheritdoc}

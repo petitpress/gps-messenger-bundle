@@ -7,13 +7,12 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 use Google\Cloud\PubSub\PubSubClient;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
-use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsTransport implements TransportInterface, SetupableTransportInterface
+final class GpsTransport implements TransportInterface
 {
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
@@ -29,6 +28,19 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+    }
+
+    public function receive(callable $handler): void
+    {
+        $this->getReceiver()->receive($handler);
+    }
+
+    /**
+     * Stop receiving some messages.
+     */
+    public function stop(): void
+    {
+        $this->getReceiver()->stop();
     }
 
     /**
