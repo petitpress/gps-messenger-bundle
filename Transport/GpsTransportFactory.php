@@ -41,7 +41,7 @@ final class GpsTransportFactory implements TransportFactoryInterface
         return new GpsTransport(
             new PubSubClient($clientConfig),
             $options,
-            $serializer
+            $this->serializer
         );
     }
 
