@@ -12,7 +12,7 @@ use PetitPress\GpsMessengerBundle\Transport\GpsReceiver;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Exception\RuntimeException;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 /**
@@ -85,7 +85,7 @@ class GpsReceiverTest extends TestCase
 
     public function testItThrowsAnExceptionInsteadOfRejecting(): void
     {
-        $this->expectException(TransportException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionCode(0);
         $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
 

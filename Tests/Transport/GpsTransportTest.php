@@ -18,7 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Exception\RuntimeException;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 class GpsTransportTest extends TestCase
@@ -62,7 +62,7 @@ class GpsTransportTest extends TestCase
 
     public function testAck(): void
     {
-        $this->expectException(TransportException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectErrorMessage('No GpsReceivedStamp found on the Envelope.');
 
         $this->subject->ack(new Envelope(new stdClass()));
@@ -70,7 +70,7 @@ class GpsTransportTest extends TestCase
 
     public function testReject(): void
     {
-        $this->expectException(TransportException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectErrorMessage('No GpsReceivedStamp found on the Envelope.');
 
         $this->subject->reject(new Envelope(new stdClass()));

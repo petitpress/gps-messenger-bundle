@@ -11,7 +11,7 @@ use LogicException;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
-use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Exception\RuntimeException;
 use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Throwable;
@@ -84,7 +84,7 @@ final class GpsReceiver implements ReceiverInterface
                 yield $this->createEnvelopeFromPubSubMessage($message);
             }
         } catch (Throwable $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -101,7 +101,7 @@ final class GpsReceiver implements ReceiverInterface
                 ->acknowledge($gpsReceivedStamp->getGpsMessage())
             ;
         } catch (Throwable $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
@@ -109,7 +109,7 @@ final class GpsReceiver implements ReceiverInterface
      * Called when handling the message failed and allows to warn PUB/SUB not to wait the ack.
      * After warning PUB/SUB, it will try to redeliver the message according to set up retry policy.
      *
-     * @throws TransportException If there is an issue communicating with the transport
+     * @throws RuntimeException If there is an issue communicating with the transport
      *
      * @see https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions#RetryPolicy
      */
@@ -123,7 +123,7 @@ final class GpsReceiver implements ReceiverInterface
                 ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0)
             ;
         } catch (Throwable $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
+            throw new RuntimeException($exception->getMessage(), 0, $exception);
         }
     }
 
