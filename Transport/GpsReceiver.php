@@ -9,6 +9,7 @@ use Google\Cloud\PubSub\PubSubClient;
 use JsonException;
 use LogicException;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\RuntimeException;
@@ -24,16 +25,20 @@ final class GpsReceiver implements ReceiverInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+
+    private ?LoggerInterface $logger;
     private $shouldStop = false;
 
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ?LoggerInterface $logger = null
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->logger = $logger;
     }
 
 
@@ -51,6 +56,10 @@ final class GpsReceiver implements ReceiverInterface
                     $this->ack($envelope);
                 } catch (\Throwable $throwable) {
                     $this->reject($envelope);
+
+                    if ($this->logger) {
+                        $this->logger->error($throwable->getMessage(), ['exception' => $throwable]);
+                    }
                 } finally {
                     if (\function_exists('pcntl_signal_dispatch')) {
                         pcntl_signal_dispatch();
