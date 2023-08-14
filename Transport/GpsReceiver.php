@@ -51,8 +51,6 @@ final class GpsReceiver implements ReceiverInterface
                     $this->ack($envelope);
                 } catch (\Throwable $throwable) {
                     $this->reject($envelope);
-
-                    throw $throwable;
                 } finally {
                     if (\function_exists('pcntl_signal_dispatch')) {
                         pcntl_signal_dispatch();
