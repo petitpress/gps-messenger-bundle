@@ -22,6 +22,8 @@ use Throwable;
  */
 final class GpsReceiver implements ReceiverInterface
 {
+    private const DEFAULT_TIME_LIMIT = 600;
+
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
@@ -41,12 +43,14 @@ final class GpsReceiver implements ReceiverInterface
         $this->logger = $logger;
     }
 
-
     /**
      * {@inheritdoc}
      */
     public function receive(callable $handler): void
     {
+        $startTime = microtime(true);
+        $endTime = $startTime + self::DEFAULT_TIME_LIMIT;
+
         while (!$this->shouldStop) {
             $envelopes = $this->get();
 
@@ -64,6 +68,16 @@ final class GpsReceiver implements ReceiverInterface
                     if (\function_exists('pcntl_signal_dispatch')) {
                         pcntl_signal_dispatch();
                     }
+                }
+            }
+
+            if ($endTime < microtime(true)) {
+                $this->stop();
+                if (null !== $this->logger) {
+                    $this->logger->info(
+                        'Receiver stopped due to time limit of {timeLimit}s reached',
+                        ['timeLimit' => self::DEFAULT_TIME_LIMIT]
+                    );
                 }
             }
         }
