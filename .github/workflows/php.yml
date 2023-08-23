@@ -13,6 +13,7 @@ jobs:
           - '7.4'
           - '8.0'
           - '8.1'
+          - '8.2'
         platform: [ubuntu-latest]
     name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
@@ -30,7 +31,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php-version }}
           restore-keys: |
             ${{ runner.os }}-composer-
 
