@@ -40,10 +40,10 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL,
                     [],
                     [],
-                    []
+                    [],
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
                 ),
             ],
             'Custom topic/subscription name configured through dsn #1' => [
@@ -52,10 +52,10 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     'something',
                     'something',
-                    GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL,
                     [],
                     [],
-                    []
+                    [],
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
                 ),
             ],
             'Custom topic/subscription name configured through dsn #2 (deprecated queue[name])' => [
@@ -64,10 +64,10 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
                     'subscription_name',
-                    GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL,
                     [],
                     [],
-                    []
+                    [],
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
                 ),
             ],
             'Custom topic/subscription name configured through dsn #3' => [
@@ -76,10 +76,10 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
                     'subscription_name',
-                    5,
                     ['apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com'],
                     ['labels' => ['label_topic1']],
                     ['labels' => ['label_subscription1'], 'enableMessageOrdering' => true, 'ackDeadlineSeconds' => 100],
+                    ['maxMessages' => 5, 'returnImmediately' => false]
                 ),
             ],
             'Custom topic/subscription name configured through options #1' => [
@@ -90,10 +90,10 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     'something',
                     'something',
-                    GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL,
                     [],
                     [],
-                    []
+                    [],
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
                 ),
             ],
             'Custom topic/subscription name configured through options #2' => [
@@ -105,10 +105,10 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
                     'subscription_name',
-                    GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL,
                     [],
                     [],
-                    []
+                    [],
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
                 ),
             ],
             'Custom topic/subscription name configured through options #4' => [
@@ -136,10 +136,72 @@ final class GpsConfigurationTest extends TestCase
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name1',
                     'subscription_name',
-                    5,
                     ['apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com'],
                     ['labels' => ['label_topic1']],
                     ['labels' => ['label_subscription1'], 'enableMessageOrdering' => true, 'ackDeadlineSeconds' => 100],
+                    ['maxMessages' => 5, 'returnImmediately' => false]
+                ),
+            ],
+            'Custom subscription pull options configured through dsn #1 (deprecated max_messages_pull)' => [
+                'dsn' => 'gps://default?max_messages_pull=5',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 5, 'returnImmediately' => false]
+                ),
+            ],
+            'Custom subscription pull options configured through dsn #2' => [
+                'dsn' => 'gps://default?subscription[pull][maxMessages]=5',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 5, 'returnImmediately' => false]
+                ),
+            ],
+            'Custom subscription pull options configured through options #1' => [
+                'dsn' => 'gps://default',
+                'options' => [
+                    'subscription' => [
+                        'pull' => [
+                            'maxMessages' => 5,
+                            'returnImmediately' => true,
+                        ]
+                    ],
+                ],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 5, 'returnImmediately' => true]
+                ),
+            ],
+            'Custom subscription pull options configured through options #2' => [
+                'dsn' => 'gps://default',
+                'options' => [
+                    'max_messages_pull' => 5,
+                    'subscription' => [
+                        'pull' => [
+                            'returnImmediately' => true,
+                        ]
+                    ],
+                ],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 5, 'returnImmediately' => true]
                 ),
             ],
         ];

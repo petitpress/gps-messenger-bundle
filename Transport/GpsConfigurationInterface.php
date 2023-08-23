@@ -17,8 +17,6 @@ interface GpsConfigurationInterface
 
     public function getSubscriptionName(): string;
 
-    public function getMaxMessagesPull(): int;
-
     /**
      * @see PubSubClient constructor options
      */
@@ -33,4 +31,9 @@ interface GpsConfigurationInterface
      * @see Subscription::create options
      */
     public function getSubscriptionOptions(): array;
+
+    /**
+     * @see Subscription::pull options
+     */
+    public function getSubscriptionPullOptions(): array;
 }

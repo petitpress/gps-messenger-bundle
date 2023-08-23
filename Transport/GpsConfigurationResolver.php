@@ -18,6 +18,10 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         self::INT_NORMALIZER_KEY => ['ackDeadlineSeconds', 'maxDeliveryAttempts'],
         self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery'],
     ];
+    private const NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS = [
+        self::INT_NORMALIZER_KEY => ['maxMessages'],
+        self::BOOL_NORMALIZER_KEY => ['returnImmediately'],
+    ];
 
     /**
      * {@inheritdoc}
@@ -34,6 +38,21 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                         $data[$optionName] = (int) filter_var($optionValue, FILTER_SANITIZE_NUMBER_INT);
                         break;
                     case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_OPTIONS[self::BOOL_NORMALIZER_KEY], true):
+                        $data[$optionName] = filter_var($optionValue, FILTER_VALIDATE_BOOLEAN);
+                        break;
+                }
+            }
+
+            return $data;
+        };
+
+        $subscriptionPullOptionsNormalizer = static function (Options $options, $data) {
+            foreach ($data ?? [] as $optionName => $optionValue) {
+                switch ($optionName) {
+                    case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS[self::INT_NORMALIZER_KEY], true):
+                        $data[$optionName] = (int) filter_var($optionValue, FILTER_SANITIZE_NUMBER_INT);
+                        break;
+                    case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS[self::BOOL_NORMALIZER_KEY], true):
                         $data[$optionName] = filter_var($optionValue, FILTER_VALIDATE_BOOLEAN);
                         break;
                 }
@@ -67,9 +86,25 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                 )
             ;
         }
+
+        if (isset($mergedOptions['max_messages_pull'])) {
+            $optionsResolver
+                ->setDefault('max_messages_pull', self::DEFAULT_MAX_MESSAGES_PULL)
+                ->setNormalizer('max_messages_pull', static function (Options $options, $value): ?int {
+                    return ((int) filter_var($value, FILTER_SANITIZE_NUMBER_INT)) ?: null;
+                })
+                ->setAllowedTypes('max_messages_pull', ['int', 'string'])
+                ->setDeprecated(
+                    'max_messages_pull',
+                    'petitpress/gps-messenger-bundle',
+                    '1.6.0',
+                    'The option "max_messages_pull" is deprecated, use option "subscription.pull.maxMessages" instead.'
+                )
+            ;
+        }
+
         $optionsResolver
             ->setDefault('client_config', [])
-            ->setDefault('max_messages_pull', self::DEFAULT_MAX_MESSAGES_PULL)
             ->setDefault('topic', function (OptionsResolver $topicResolver): void {
                 $topicResolver
                     ->setDefault('name', self::DEFAULT_TOPIC_NAME)
@@ -80,13 +115,24 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             })
             ->setDefault(
                 'subscription',
-                function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer): void {
+                function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer, $subscriptionPullOptionsNormalizer): void {
                     if ($parentOptions->offsetExists('queue')) {
                         $resolver
                             ->setDefault('name', $parentOptions['queue']['name'])
                             ->setDefault('options', $parentOptions['queue']['options'])
+                            ->setDefault(
+                                'pull',
+                                function (OptionsResolver $pullResolver) use ($parentOptions): void {
+                                    $pullResolver
+                                        ->setDefault('maxMessages', $parentOptions->offsetExists('max_messages_pull') ? $parentOptions['max_messages_pull'] : self::DEFAULT_MAX_MESSAGES_PULL)
+                                        ->setDefault('returnImmediately', false)
+                                    ;
+                                }
+                            )
                             ->setAllowedTypes('name', 'string')
                             ->setAllowedTypes('options', 'array')
+                            ->setAllowedTypes('pull', 'array')
+                            ->setNormalizer('pull', $subscriptionPullOptionsNormalizer)
                         ;
 
                         return;
@@ -95,15 +141,23 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
                         ->setDefault('options', [])
+                        ->setDefault(
+                            'pull',
+                            function (OptionsResolver $pullResolver) use ($parentOptions): void {
+                                $pullResolver
+                                    ->setDefault('maxMessages', $parentOptions->offsetExists('max_messages_pull') ? $parentOptions['max_messages_pull'] : self::DEFAULT_MAX_MESSAGES_PULL)
+                                    ->setDefault('returnImmediately', false)
+                                ;
+                            }
+                        )
                         ->setAllowedTypes('name', 'string')
                         ->setAllowedTypes('options', 'array')
-                        ->setNormalizer('options', $subscriptionOptionsNormalizer);
+                        ->setAllowedTypes('pull', 'array')
+                        ->setNormalizer('options', $subscriptionOptionsNormalizer)
+                        ->setNormalizer('pull', $subscriptionPullOptionsNormalizer)
+                    ;
                 }
             )
-            ->setNormalizer('max_messages_pull', static function (Options $options, $value): ?int {
-                return ((int) filter_var($value, FILTER_SANITIZE_NUMBER_INT)) ?: null;
-            })
-            ->setAllowedTypes('max_messages_pull', ['int', 'string'])
             ->setAllowedTypes('client_config', 'array')
         ;
 
@@ -112,10 +166,10 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         return new GpsConfiguration(
             $resolvedOptions['topic']['name'],
             $resolvedOptions['subscription']['name'],
-            $resolvedOptions['max_messages_pull'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
-            $resolvedOptions['subscription']['options']
+            $resolvedOptions['subscription']['options'],
+            $resolvedOptions['subscription']['pull']
         );
     }
 

@@ -52,7 +52,6 @@ framework:
                 options:
                     client_config: # optional (default: [])
                         apiEndpoint: 'https://europe-west3-pubsub.googleapis.com'
-                    max_messages_pull: 10 # optional (default: 10)
                     topic: # optional (default name: messages)
                         name: 'messages'
                         options: # optional create options if not exists (default: []), for all options take at look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/topic?method=create
@@ -66,6 +65,9 @@ framework:
                             labels:
                                 - label1
                                 - label2
+                        pull:
+                            maxMessages: 10 # optional (default: 10)
+
 ```
 or:
 ```yaml
@@ -75,7 +77,7 @@ framework:
     messenger:
         transports:
             gps_transport:
-                dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&max_messages_pull=10'
+                dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&subscription[pull][maxMessages]=10'
 ```
 to use emulator in local:
 ```yaml
