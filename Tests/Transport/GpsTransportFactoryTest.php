@@ -29,7 +29,7 @@ class GpsTransportFactoryTest extends TestCase
         $this->assertSame($expected, $this->subject->supports($dsn, []));
     }
 
-    public function dsnProvider(): array
+    public static function dsnProvider(): array
     {
         return [
             [true,  'gps://defaults/messages?client_config[apiEndpoint]=0.0.0.0:8432'],

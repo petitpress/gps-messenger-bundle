@@ -12,6 +12,7 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
+ * @implements TransportFactoryInterface<GpsTransport>
  */
 final class GpsTransportFactory implements TransportFactoryInterface
 {
