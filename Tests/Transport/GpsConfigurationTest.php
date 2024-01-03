@@ -31,7 +31,7 @@ final class GpsConfigurationTest extends TestCase
         $this->assertEquals($expectedConfiguration, $configuration);
     }
 
-    public function dataProvider(): array
+    public static function dataProvider(): array
     {
         return [
             'Empty default' => [
