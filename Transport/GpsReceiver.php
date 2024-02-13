@@ -87,7 +87,7 @@ final class GpsReceiver implements ReceiverInterface
 
             $this->pubSubClient
                 ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0)
+                ->acknowledge($gpsReceivedStamp->getGpsMessage())
             ;
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
