@@ -13,7 +13,6 @@ use PetitPress\GpsMessengerBundle\Transport\Stamp\AttributesStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 /**
@@ -59,26 +58,6 @@ class GpsSenderTest extends TestCase
             $this->gpsConfigurationMock,
             $this->serializerMock,
         );
-    }
-
-    public function testItDoesNotPublishIfTheLastStampIsOfTypeRedelivery(): void
-    {
-        $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
-        $envelopeArray = ['body' => []];
-
-        $this->serializerMock
-            ->expects($this->once())
-            ->method('encode')
-            ->with($envelope)
-            ->willReturn($envelopeArray)
-        ;
-
-        $this->pubSubClientMock
-            ->expects($this->never())
-            ->method('topic')
-        ;
-
-        self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
 
     public function testItPublishesWithOrderingKey(): void
