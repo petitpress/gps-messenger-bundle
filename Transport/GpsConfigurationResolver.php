@@ -16,7 +16,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
     private const BOOL_NORMALIZER_KEY = 'bool';
     private const NORMALIZABLE_SUBSCRIPTION_OPTIONS = [
         self::INT_NORMALIZER_KEY => ['ackDeadlineSeconds', 'maxDeliveryAttempts'],
-        self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery', "enableCreation"],
+        self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery', 'enableCreation'],
     ];
     private const NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS = [
         self::INT_NORMALIZER_KEY => ['maxMessages'],
