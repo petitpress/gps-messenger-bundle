@@ -16,11 +16,11 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
     private const BOOL_NORMALIZER_KEY = 'bool';
     private const NORMALIZABLE_SUBSCRIPTION_OPTIONS = [
         self::INT_NORMALIZER_KEY => ['ackDeadlineSeconds', 'maxDeliveryAttempts'],
-        self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery'],
+        self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery', 'enableCreation'],
     ];
     private const NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS = [
         self::INT_NORMALIZER_KEY => ['maxMessages'],
-        self::BOOL_NORMALIZER_KEY => ['returnImmediately'],
+        self::BOOL_NORMALIZER_KEY => ['returnImmediately', 'enableCreation'],
     ];
 
     /**
@@ -108,6 +108,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             ->setDefault('topic', function (OptionsResolver $topicResolver): void {
                 $topicResolver
                     ->setDefault('name', self::DEFAULT_TOPIC_NAME)
+                    ->setDefault('enableCreation', true)
                     ->setDefault('options', [])
                     ->setAllowedTypes('name', 'string')
                     ->setAllowedTypes('options', 'array')
@@ -140,6 +141,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
+                        ->setDefault('enableCreation', true)
                         ->setDefault('options', [])
                         ->setDefault(
                             'pull',
@@ -165,7 +167,9 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         return new GpsConfiguration(
             $resolvedOptions['topic']['name'],
+            $resolvedOptions['topic']['enableCreation'],
             $resolvedOptions['subscription']['name'],
+            $resolvedOptions['subscription']['enableCreation'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],

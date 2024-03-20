@@ -10,22 +10,28 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 final class GpsConfiguration implements GpsConfigurationInterface
 {
     private string $topicName;
+    private bool   $isTopicEnabled;
     private string $subscriptionName;
-    private array $clientConfig;
-    private array $topicOptions;
-    private array $subscriptionOptions;
-    private array $subscriptionPullOptions;
+    private bool   $isSubscriptionEnabled;
+    private array  $clientConfig;
+    private array  $topicOptions;
+    private array  $subscriptionOptions;
+    private array  $subscriptionPullOptions;
 
     public function __construct(
         string $queueName,
+        bool   $isTopicEnabled,
         string $subscriptionName,
-        array $clientConfig,
-        array $topicOptions,
-        array $subscriptionOptions,
-        array $subscriptionPullOptions
+        bool   $isSubscriptionEnabled,
+        array  $clientConfig,
+        array  $topicOptions,
+        array  $subscriptionOptions,
+        array  $subscriptionPullOptions
     ) {
         $this->topicName = $queueName;
+        $this->isTopicEnabled = $isTopicEnabled;
         $this->subscriptionName = $subscriptionName;
+        $this->isSubscriptionEnabled = $isSubscriptionEnabled;
         $this->clientConfig = $clientConfig;
         $this->topicOptions = $topicOptions;
         $this->subscriptionOptions = $subscriptionOptions;
@@ -37,9 +43,19 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->topicName;
     }
 
+    public function isTopicEnabled(): bool
+    {
+        return $this->isTopicEnabled;
+    }
+
     public function getSubscriptionName(): string
     {
         return $this->subscriptionName;
+    }
+
+    public function isSubscriptionEnabled(): bool
+    {
+        return $this->isSubscriptionEnabled;
     }
 
     public function getClientConfig(): array
