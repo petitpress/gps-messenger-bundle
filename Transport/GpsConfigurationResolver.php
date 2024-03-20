@@ -109,6 +109,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                 $topicResolver
                     ->setDefault('name', self::DEFAULT_TOPIC_NAME)
                     ->setDefault('enableCreation', true)
+                    ->setDefault('options', [])
                     ->setAllowedTypes('name', 'string')
                     ->setAllowedTypes('options', 'array')
                 ;
@@ -141,6 +142,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
                         ->setDefault('enableCreation', true)
+                        ->setDefault('options', [])
                         ->setDefault(
                             'pull',
                             function (OptionsResolver $pullResolver) use ($parentOptions): void {
@@ -165,7 +167,9 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         return new GpsConfiguration(
             $resolvedOptions['topic']['name'],
+            $resolvedOptions['topic']['enableCreation'],
             $resolvedOptions['subscription']['name'],
+            $resolvedOptions['subscription']['enableCreation'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],
