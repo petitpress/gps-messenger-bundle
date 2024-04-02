@@ -16,7 +16,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
     private const BOOL_NORMALIZER_KEY = 'bool';
     private const NORMALIZABLE_SUBSCRIPTION_OPTIONS = [
         self::INT_NORMALIZER_KEY => ['ackDeadlineSeconds', 'maxDeliveryAttempts'],
-        self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery'],
+        self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery', 'createIfNotExist'],
     ];
 
     /**
@@ -45,34 +45,19 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         $mergedOptions = $this->getMergedOptions($dsn, $options);
         $resolvedOptions = [];
 
-        if (isset($mergedOptions['queue'])) {
-            // queue option is deprecated
-            $optionsResolver = new OptionsResolver();
-            $optionsResolver
-                ->setDefault('name', $mergedOptions['topic']['name'])
-                ->setDefault('options', [])
-                ->setAllowedTypes('name', 'string')
-                ->setAllowedTypes('options', 'array')
-                ->setNormalizer('options', $subscriptionOptionsNormalizer)
-            ;
-
-            $resolvedOptions['queue'] = $optionsResolver->resolve($mergedOptions['queue']);
-        }
-
         $optionsResolver = new OptionsResolver();
         $optionsResolver
             ->setDefault('name', self::DEFAULT_TOPIC_NAME)
+            ->setDefault('createIfNotExist', true)
             ->setDefault('options', [])
             ->setAllowedTypes('name', 'string')
             ->setAllowedTypes('options', 'array');
         $resolvedOptions['topic'] = $optionsResolver->resolve($mergedOptions['topic'] ?? []);
 
-
         $resolvedOptions['subscription'] = $this->resolveSubscription(
             $mergedOptions,
             $subscriptionOptionsNormalizer
         );
-
 
         $optionsResolver = new OptionsResolver();
         $optionsResolver
@@ -100,11 +85,13 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         $resolvedOptions = array_merge($optionsResolver->resolve($mergedOptions), $resolvedOptions);
         return new GpsConfiguration(
             $resolvedOptions['topic']['name'],
+            $resolvedOptions['topic']['createIfNotExist'],
             $resolvedOptions['subscription']['name'],
+            $resolvedOptions['subscription']['createIfNotExist'] ?? true,
             $resolvedOptions['max_messages_pull'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
-            $resolvedOptions['subscription']['options']
+            $resolvedOptions['subscription']['options'],
         );
     }
 
@@ -123,28 +110,35 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $dnsOptions['topic']['name'] = substr($dnsPathOption, 1);
         }
 
+       if (isset($dnsOptions['topic']['createIfNotExist'])) {
+            $dnsOptions['topic']['createIfNotExist'] = $this->toBool($dnsOptions['topic']['createIfNotExist'], true);
+       }
+
+        if (isset($dnsOptions['subscription']['createIfNotExist'])) {
+            $dnsOptions['subscription']['createIfNotExist'] = $this->toBool($dnsOptions['subscription']['createIfNotExist'], true);
+        }
+
         return array_merge($dnsOptions, $options);
     }
 
     private function resolveSubscription(array $mergedOptions, \Closure $subscriptionOptionsNormalizer): array
     {
         $optionsResolver = new OptionsResolver();
-        if (isset($mergedOptions['queue'])) {
-            $optionsResolver
-                ->setDefault('name', $mergedOptions['queue']['name'])
-                ->setDefault('options', $mergedOptions['queue']['options'])
-                ->setAllowedTypes('name', 'string')
-                ->setAllowedTypes('options', 'array');
-            return $optionsResolver->resolve($mergedOptions['subscription']);
-        }
-
         $optionsResolver
-            ->setDefault('name', $mergedOptions['topic']['name'])
+            ->setDefault('name', $mergedOptions['topic']['name'] ?? self::DEFAULT_TOPIC_NAME)
+            ->setDefault('createIfNotExist', true)
             ->setDefault('options', [])
             ->setAllowedTypes('name', 'string')
             ->setAllowedTypes('options', 'array')
             ->setNormalizer('options', $subscriptionOptionsNormalizer);
 
         return $optionsResolver->resolve($mergedOptions['subscription'] ?? []);
+    }
+
+    private function toBool(string $value, bool $default): bool
+    {
+        $result = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $result ?? $default;
     }
 }

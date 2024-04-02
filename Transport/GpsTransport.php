@@ -109,7 +109,7 @@ final class GpsTransport implements TransportInterface
     {
         $topic = $this->pubSubClient->topic($this->gpsConfiguration->getTopicName());
 
-        if (false === $topic->exists()) {
+        if (false === $topic->exists() && $this->gpsConfiguration->createTopicIfNotExist()) {
             $topic = $this->pubSubClient->createTopic(
                 $this->gpsConfiguration->getTopicName(),
                 $this->gpsConfiguration->getTopicOptions()
@@ -118,7 +118,7 @@ final class GpsTransport implements TransportInterface
 
         $subscription = $topic->subscription($this->gpsConfiguration->getSubscriptionName());
 
-        if (false === $subscription->exists()) {
+        if (false === $subscription->exists() && $this->gpsConfiguration->createSubscriptionIfNotExist()) {
             $topic->subscribe(
                 $this->gpsConfiguration->getSubscriptionName(),
                 $this->gpsConfiguration->getSubscriptionOptions()

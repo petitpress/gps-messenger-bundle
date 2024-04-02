@@ -15,7 +15,11 @@ interface GpsConfigurationInterface
 {
     public function getTopicName(): string;
 
+    public function createTopicIfNotExist(): bool;
+
     public function getSubscriptionName(): string;
+
+    public function createSubscriptionIfNotExist(): bool;
 
     public function getMaxMessagesPull(): int;
 

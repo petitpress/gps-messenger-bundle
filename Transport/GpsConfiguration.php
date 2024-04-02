@@ -10,7 +10,9 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 final class GpsConfiguration implements GpsConfigurationInterface
 {
     private string $topicName;
+    private bool   $createTopicIfNotExist;
     private string $subscriptionName;
+    private bool   $createSubscriptionIfNotExist;
     private int $maxMessagesPull;
     private array $clientConfig;
     private array $topicOptions;
@@ -18,14 +20,18 @@ final class GpsConfiguration implements GpsConfigurationInterface
 
     public function __construct(
         string $queueName,
+        bool $createTopicIfNotExist,
         string $subscriptionName,
+        bool $createSubscriptionIfNotExist,
         int $maxMessagesPull,
         array $clientConfig,
         array $topicOptions,
         array $subscriptionOptions
     ) {
         $this->topicName = $queueName;
+        $this->createTopicIfNotExist = $createTopicIfNotExist;
         $this->subscriptionName = $subscriptionName;
+        $this->createSubscriptionIfNotExist = $createSubscriptionIfNotExist;
         $this->maxMessagesPull = $maxMessagesPull;
         $this->clientConfig = $clientConfig;
         $this->topicOptions = $topicOptions;
@@ -37,9 +43,19 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->topicName;
     }
 
+    public function createTopicIfNotExist(): bool
+    {
+        return $this->createTopicIfNotExist;
+    }
+
     public function getSubscriptionName(): string
     {
         return $this->subscriptionName;
+    }
+
+    public function createSubscriptionIfNotExist(): bool
+    {
+        return $this->createSubscriptionIfNotExist;
     }
 
     public function getMaxMessagesPull(): int
