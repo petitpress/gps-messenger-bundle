@@ -39,9 +39,9 @@ final class GpsConfigurationTest extends TestCase
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -53,9 +53,9 @@ final class GpsConfigurationTest extends TestCase
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     'something',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     'something',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -67,9 +67,9 @@ final class GpsConfigurationTest extends TestCase
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     'subscription_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -81,9 +81,9 @@ final class GpsConfigurationTest extends TestCase
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     'subscription_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     ['apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com'],
                     ['labels' => ['label_topic1']],
                     ['labels' => ['label_subscription1'], 'enableMessageOrdering' => true, 'ackDeadlineSeconds' => 100],
@@ -97,9 +97,9 @@ final class GpsConfigurationTest extends TestCase
                 ],
                 'expectedConfiguration' => new GpsConfiguration(
                     'something',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     'something',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -114,9 +114,9 @@ final class GpsConfigurationTest extends TestCase
                 ],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     'subscription_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -147,9 +147,9 @@ final class GpsConfigurationTest extends TestCase
                 ],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name1',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     'subscription_name',
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     ['apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com'],
                     ['labels' => ['label_topic1']],
                     ['labels' => ['label_subscription1'], 'enableMessageOrdering' => true, 'ackDeadlineSeconds' => 100],
@@ -161,9 +161,9 @@ final class GpsConfigurationTest extends TestCase
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -175,9 +175,9 @@ final class GpsConfigurationTest extends TestCase
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -196,9 +196,9 @@ final class GpsConfigurationTest extends TestCase
                 ],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -217,9 +217,9 @@ final class GpsConfigurationTest extends TestCase
                 ],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
@@ -228,30 +228,95 @@ final class GpsConfigurationTest extends TestCase
             ],
             'Subscription is not created' => [
                 'dsn' => 'gps://default',
-                'enableCreation' => false,
+                'options' => [
+                    'subscription' => [
+                        'createIfNotExist' => false
+                    ],
+                ],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
                     false,
                     [],
                     [],
                     [],
-                    ['maxMessages' => 5, 'returnImmediately' => true]
+                    ['maxMessages' => 10, 'returnImmediately' => false]
                 ),
             ],
             'Topic is not created' => [
                 'dsn' => 'gps://default',
-                'enableCreation' => false,
+                'options' => [
+                    'topic' => [
+                        'createIfNotExist' => false
+                    ],
+                ],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
                     false,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    GpsConfigurationResolverInterface::CREATION_ENABLE,
+                    true,
                     [],
                     [],
                     [],
-                    ['maxMessages' => 5, 'returnImmediately' => true]
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: Subscription is not created' => [
+                'dsn' => 'gps://default?topic[name]=foo&subscription[name]=bar&subscription[createIfNotExist]=false',
+                'options' => [],
+                //&topic[createIfNotExist]=true
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    true,
+                    'bar',
+                    false,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: Subscription is not created #2' => [
+                'dsn' => 'gps://default?topic[name]=foo&topic[createIfNotExist]=true&subscription[name]=bar&subscription[createIfNotExist]=false',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    true,
+                    'bar',
+                    false,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: Topic is not created' => [
+                'dsn' => 'gps://default?topic[name]=foo&topic[createIfNotExist]=false&subscription[name]=bar&subscription[createIfNotExist]=true',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    false,
+                    'bar',
+                    true,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: Topic is not created #2' => [
+                'dsn' => 'gps://default?topic[name]=foo&topic[createIfNotExist]=false&subscription[name]=bar',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    false,
+                    'bar',
+                    true,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
                 ),
             ],
         ];

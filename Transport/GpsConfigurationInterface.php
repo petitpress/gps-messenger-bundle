@@ -15,11 +15,11 @@ interface GpsConfigurationInterface
 {
     public function getTopicName(): string;
 
-    public function isTopicEnabled(): bool;
+    public function createTopicIfNotExist(): bool;
 
     public function getSubscriptionName(): string;
 
-    public function isSubscriptionEnabled(): bool;
+    public function createSubscriptionIfNotExist(): bool;
 
     /**
      * @see PubSubClient constructor options

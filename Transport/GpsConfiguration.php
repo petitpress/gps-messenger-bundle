@@ -10,9 +10,9 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 final class GpsConfiguration implements GpsConfigurationInterface
 {
     private string $topicName;
-    private bool   $isTopicEnabled;
+    private bool   $createTopicIfNotExist;
     private string $subscriptionName;
-    private bool   $isSubscriptionEnabled;
+    private bool   $createSubscriptionIfNotExist;
     private array  $clientConfig;
     private array  $topicOptions;
     private array  $subscriptionOptions;
@@ -20,18 +20,18 @@ final class GpsConfiguration implements GpsConfigurationInterface
 
     public function __construct(
         string $queueName,
-        bool   $isTopicEnabled,
+        bool $isTopicEnabled,
         string $subscriptionName,
-        bool   $isSubscriptionEnabled,
-        array  $clientConfig,
-        array  $topicOptions,
-        array  $subscriptionOptions,
-        array  $subscriptionPullOptions
+        bool $isSubscriptionEnabled,
+        array $clientConfig,
+        array $topicOptions,
+        array $subscriptionOptions,
+        array $subscriptionPullOptions
     ) {
         $this->topicName = $queueName;
-        $this->isTopicEnabled = $isTopicEnabled;
+        $this->createTopicIfNotExist = $isTopicEnabled;
         $this->subscriptionName = $subscriptionName;
-        $this->isSubscriptionEnabled = $isSubscriptionEnabled;
+        $this->createSubscriptionIfNotExist = $isSubscriptionEnabled;
         $this->clientConfig = $clientConfig;
         $this->topicOptions = $topicOptions;
         $this->subscriptionOptions = $subscriptionOptions;
@@ -43,9 +43,9 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->topicName;
     }
 
-    public function isTopicEnabled(): bool
+    public function createTopicIfNotExist(): bool
     {
-        return $this->isTopicEnabled;
+        return $this->createTopicIfNotExist;
     }
 
     public function getSubscriptionName(): string
@@ -53,9 +53,9 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->subscriptionName;
     }
 
-    public function isSubscriptionEnabled(): bool
+    public function createSubscriptionIfNotExist(): bool
     {
-        return $this->isSubscriptionEnabled;
+        return $this->createSubscriptionIfNotExist;
     }
 
     public function getClientConfig(): array
