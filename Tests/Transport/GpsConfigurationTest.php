@@ -318,6 +318,20 @@ final class GpsConfigurationTest extends TestCase
                     ['maxMessages' => 10, 'returnImmediately' => false]
                 ),
             ],
+            'DSN: createIfNotExist contains invalid value' => [
+                'dsn' => 'gps://default?topic[name]=foo&topic[createIfNotExist]=quux&subscription[name]=bar',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    true,
+                    'bar',
+                    true,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
         ];
     }
 }
