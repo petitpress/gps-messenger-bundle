@@ -265,7 +265,6 @@ final class GpsConfigurationTest extends TestCase
             'DSN: Subscription is not created' => [
                 'dsn' => 'gps://default?topic[name]=foo&subscription[name]=bar&subscription[createIfNotExist]=false',
                 'options' => [],
-                //&topic[createIfNotExist]=true
                 'expectedConfiguration' => new GpsConfiguration(
                     'foo',
                     true,
