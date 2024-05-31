@@ -10,7 +10,6 @@ use PetitPress\GpsMessengerBundle\Transport\Stamp\AttributesStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
-use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Transport\Sender\SenderInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
@@ -45,12 +44,6 @@ final class GpsSender implements SenderInterface
             $messageBuilder = $messageBuilder->setData(json_encode($encodedMessage, JSON_THROW_ON_ERROR));
         } catch (\JsonException $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
-        }
-
-        $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
-        if ($redeliveryStamp instanceof RedeliveryStamp) {
-            // do not try to redeliver, message wasn't acknowledged, so let's Google Pub/Sub do its job with retry policy
-            return $envelope;
         }
 
         $orderingKeyStamp = $envelope->last(OrderingKeyStamp::class);
