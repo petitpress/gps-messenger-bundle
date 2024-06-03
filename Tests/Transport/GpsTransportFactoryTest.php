@@ -17,7 +17,8 @@ class GpsTransportFactoryTest extends TestCase
     {
         $this->subject = new GpsTransportFactory(
             $this->createMock(GpsConfigurationResolverInterface::class),
-            $this->createMock(CacheItemPoolInterface::class)
+            $this->createMock(CacheItemPoolInterface::class),
+            null
         );
     }
 

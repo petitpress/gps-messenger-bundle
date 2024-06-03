@@ -134,6 +134,16 @@ class GpsTransportTest extends TestCase
             ->method('getSubscriptionName')
             ->willReturn($queue);
 
+        $this->gpsConfiguration
+            ->expects($this->atLeast(1))
+            ->method('isTopicCreationEnabled')
+            ->willReturn(true);
+
+        $this->gpsConfiguration
+            ->expects($this->atLeast(1))
+            ->method('isSubscriptionCreationEnabled')
+            ->willReturn(true);
+
         $topicMock = $this->createMock(Topic::class);
         $topicMock
             ->expects($this->once())

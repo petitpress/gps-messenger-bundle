@@ -108,8 +108,10 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             ->setDefault('topic', function (OptionsResolver $topicResolver): void {
                 $topicResolver
                     ->setDefault('name', self::DEFAULT_TOPIC_NAME)
+                    ->setDefault('createIfNotExist', true)
                     ->setDefault('options', [])
                     ->setAllowedTypes('name', 'string')
+                    ->setAllowedTypes('createIfNotExist', 'bool')
                     ->setAllowedTypes('options', 'array')
                 ;
             })
@@ -119,6 +121,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                     if ($parentOptions->offsetExists('queue')) {
                         $resolver
                             ->setDefault('name', $parentOptions['queue']['name'])
+                            ->setDefault('createIfNotExist', true)
                             ->setDefault('options', $parentOptions['queue']['options'])
                             ->setDefault(
                                 'pull',
@@ -130,6 +133,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                                 }
                             )
                             ->setAllowedTypes('name', 'string')
+                            ->setAllowedTypes('createIfNotExist', 'bool')
                             ->setAllowedTypes('options', 'array')
                             ->setAllowedTypes('pull', 'array')
                             ->setNormalizer('pull', $subscriptionPullOptionsNormalizer)
@@ -140,6 +144,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
+                        ->setDefault('createIfNotExist', true)
                         ->setDefault('options', [])
                         ->setDefault(
                             'pull',
@@ -151,6 +156,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                             }
                         )
                         ->setAllowedTypes('name', 'string')
+                        ->setAllowedTypes('createIfNotExist', 'bool')
                         ->setAllowedTypes('options', 'array')
                         ->setAllowedTypes('pull', 'array')
                         ->setNormalizer('options', $subscriptionOptionsNormalizer)
@@ -165,7 +171,9 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         return new GpsConfiguration(
             $resolvedOptions['topic']['name'],
+            $resolvedOptions['topic']['createIfNotExist'],
             $resolvedOptions['subscription']['name'],
+            $resolvedOptions['subscription']['createIfNotExist'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],
@@ -188,6 +196,21 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $dnsOptions['topic']['name'] = substr($dnsPathOption, 1);
         }
 
+        if (isset($dnsOptions['topic']['createIfNotExist'])) {
+            $dnsOptions['topic']['createIfNotExist'] = $this->toBool($dnsOptions['topic']['createIfNotExist'], true);
+        }
+
+        if (isset($dnsOptions['subscription']['createIfNotExist'])) {
+            $dnsOptions['subscription']['createIfNotExist'] = $this->toBool($dnsOptions['subscription']['createIfNotExist'], true);
+        }
+
         return array_merge($dnsOptions, $options);
+    }
+
+    private function toBool(string $value, bool $default): bool
+    {
+        $result = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $result ?? $default;
     }
 }
