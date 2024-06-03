@@ -37,6 +37,9 @@
         "symplify/easy-coding-standard": "^11.1"
     },
     "autoload": {
-        "psr-4": { "PetitPress\\GpsMessengerBundle\\": "" }
+        "psr-4": { "PetitPress\\GpsMessengerBundle\\": "src" }
+    },
+    "autoload-dev": {
+        "psr-4": { "PetitPress\\GpsMessengerBundle\\Tests\\": "tests" }
     }
 }

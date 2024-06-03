@@ -16,7 +16,7 @@ return static function (ECSConfig $ecsConfig): void {
         SetList::STRICT,
     ]);
 
-    $ecsConfig->paths([__DIR__ . '/Transport', __DIR__ . '/Tests']);
+    $ecsConfig->paths([__DIR__ . '/src/Transport', __DIR__ . '/tests']);
 
     $ecsConfig->ruleWithConfiguration(ArraySyntaxFixer::class, [
         'syntax' => 'short',
