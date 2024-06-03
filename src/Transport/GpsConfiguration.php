@@ -19,7 +19,7 @@ final class GpsConfiguration implements GpsConfigurationInterface
     private array  $subscriptionPullOptions;
 
     public function __construct(
-        string $queueName,
+        string $topicName,
         bool $topicCreationEnabled,
         string $subscriptionName,
         bool $subscriptionCreationEnabled,
@@ -28,7 +28,7 @@ final class GpsConfiguration implements GpsConfigurationInterface
         array $subscriptionOptions,
         array $subscriptionPullOptions
     ) {
-        $this->topicName = $queueName;
+        $this->topicName = $topicName;
         $this->topicCreationEnabled = $topicCreationEnabled;
         $this->subscriptionName = $subscriptionName;
         $this->subscriptionCreationEnabled = $subscriptionCreationEnabled;

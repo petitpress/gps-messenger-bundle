@@ -36,3 +36,11 @@ framework:
 ```
 
 For all other BC breaks, please read: https://github.com/googleapis/google-cloud-php/blob/2a8108caf5065132bb41872cab8a668b5d4e6bdc/PubSub/MIGRATING.md
+
+## Removed option `queue`
+
+The option `queue` was removed. Please use `subscription` instead.
+
+## Removed option `max_messages_pull`
+
+The option `max_messages_pull` was removed, use option `subscription.pull.maxMessages` instead.
