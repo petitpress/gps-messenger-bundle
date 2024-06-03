@@ -16,16 +16,16 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('auth_cache')
-                    ->cannotBeEmpty()
-                    ->defaultValue('cache.app')
-                    ->info('A cache for storing access tokens.')
-                ->end()
-                ->enumNode('forced_transport')
-                    ->values(['grpc', 'rest'])
-                    ->defaultNull()
-                    ->info('A forced transport for all messenger transports.')
-                ->end()
+            ->scalarNode('auth_cache')
+            ->cannotBeEmpty()
+            ->defaultValue('cache.app')
+            ->info('A cache for storing access tokens.')
+            ->end()
+            ->enumNode('forced_transport')
+            ->values(['grpc', 'rest'])
+            ->defaultNull()
+            ->info('A forced transport for all messenger transports.')
+            ->end()
             ->end()
         ;
 

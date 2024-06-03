@@ -85,7 +85,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                         ->setDefault('options', [])
                         ->setDefault(
                             'pull',
-                            function (OptionsResolver $pullResolver) : void {
+                            function (OptionsResolver $pullResolver): void {
                                 $pullResolver
                                     ->setDefault('maxMessages', self::DEFAULT_MAX_MESSAGES_PULL)
                                     ->setDefault('returnImmediately', false)
