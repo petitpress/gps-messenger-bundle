@@ -1,7 +1,11 @@
 UPGRADE FROM 2.x to 3.0
 =======================
 
-## Upgrade to Google PubSub V2
+## Dropped support for Symfony 5.1, 5.2, 5.3
+
+Symfony 5.1, 5.2, 5.3 are not supported.
+
+## Upgraded to Google PubSub V2
 
 `GpsMessengerBundle` `3.0` requires `google/cloud-pubsub` version `2`. It has many BC breaks in the configuration options.
 
