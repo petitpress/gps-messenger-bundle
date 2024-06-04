@@ -64,45 +64,6 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         $mergedOptions = $this->getMergedOptions($dsn, $options);
 
         $optionsResolver = new OptionsResolver();
-        if (isset($mergedOptions['queue'])) {
-            $optionsResolver
-                ->setDefault(
-                    'queue',
-                    function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer): void {
-                        $resolver
-                            ->setDefault('name', $parentOptions['topic']['name'])
-                            ->setDefault('options', [])
-                            ->setAllowedTypes('name', 'string')
-                            ->setAllowedTypes('options', 'array')
-                            ->setNormalizer('options', $subscriptionOptionsNormalizer)
-                        ;
-                    }
-                )
-                ->setDeprecated(
-                    'queue',
-                    'petitpress/gps-messenger-bundle',
-                    '1.3.0',
-                    'The option "queue" is deprecated, use option "subscription" instead.'
-                )
-            ;
-        }
-
-        if (isset($mergedOptions['max_messages_pull'])) {
-            $optionsResolver
-                ->setDefault('max_messages_pull', self::DEFAULT_MAX_MESSAGES_PULL)
-                ->setNormalizer('max_messages_pull', static function (Options $options, $value): ?int {
-                    return ((int) filter_var($value, FILTER_SANITIZE_NUMBER_INT)) ?: null;
-                })
-                ->setAllowedTypes('max_messages_pull', ['int', 'string'])
-                ->setDeprecated(
-                    'max_messages_pull',
-                    'petitpress/gps-messenger-bundle',
-                    '1.6.0',
-                    'The option "max_messages_pull" is deprecated, use option "subscription.pull.maxMessages" instead.'
-                )
-            ;
-        }
-
         $optionsResolver
             ->setDefault('client_config', [])
             ->setDefault('topic', function (OptionsResolver $topicResolver): void {
@@ -118,39 +79,15 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             ->setDefault(
                 'subscription',
                 function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer, $subscriptionPullOptionsNormalizer): void {
-                    if ($parentOptions->offsetExists('queue')) {
-                        $resolver
-                            ->setDefault('name', $parentOptions['queue']['name'])
-                            ->setDefault('createIfNotExist', true)
-                            ->setDefault('options', $parentOptions['queue']['options'])
-                            ->setDefault(
-                                'pull',
-                                function (OptionsResolver $pullResolver) use ($parentOptions): void {
-                                    $pullResolver
-                                        ->setDefault('maxMessages', $parentOptions->offsetExists('max_messages_pull') ? $parentOptions['max_messages_pull'] : self::DEFAULT_MAX_MESSAGES_PULL)
-                                        ->setDefault('returnImmediately', false)
-                                    ;
-                                }
-                            )
-                            ->setAllowedTypes('name', 'string')
-                            ->setAllowedTypes('createIfNotExist', 'bool')
-                            ->setAllowedTypes('options', 'array')
-                            ->setAllowedTypes('pull', 'array')
-                            ->setNormalizer('pull', $subscriptionPullOptionsNormalizer)
-                        ;
-
-                        return;
-                    }
-
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
                         ->setDefault('createIfNotExist', true)
                         ->setDefault('options', [])
                         ->setDefault(
                             'pull',
-                            function (OptionsResolver $pullResolver) use ($parentOptions): void {
+                            function (OptionsResolver $pullResolver): void {
                                 $pullResolver
-                                    ->setDefault('maxMessages', $parentOptions->offsetExists('max_messages_pull') ? $parentOptions['max_messages_pull'] : self::DEFAULT_MAX_MESSAGES_PULL)
+                                    ->setDefault('maxMessages', self::DEFAULT_MAX_MESSAGES_PULL)
                                     ->setDefault('returnImmediately', false)
                                 ;
                             }

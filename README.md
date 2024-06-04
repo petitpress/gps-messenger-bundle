@@ -40,6 +40,20 @@ GCLOUD_PROJECT='project-id'
 PUBSUB_EMULATOR_HOST=http://localhost:8538
 ```
 
+or if you have credentials in a base64 encoded env variable:
+```yaml
+# config/packages/messenger.yaml
+
+framework:
+    messenger:
+        transports:
+            gps_transport:
+                dsn: 'gps://default'
+                options:
+                    client_config:
+                        credentials: '%env(json:base64:GOOGLE_PUBSUB_KEY)%'
+```
+
 ### Step 3: Configure Symfony Messenger
 ```yaml
 # config/packages/messenger.yaml

@@ -122,17 +122,17 @@ class GpsTransportTest extends TestCase
 
     public function testSetup()
     {
-        $queue = 'test';
+        $subscription = 'test';
 
         $this->gpsConfiguration
             ->expects($this->atLeast(2))
             ->method('getTopicName')
-            ->willReturn($queue);
+            ->willReturn($subscription);
 
         $this->gpsConfiguration
             ->expects($this->atLeast(2))
             ->method('getSubscriptionName')
-            ->willReturn($queue);
+            ->willReturn($subscription);
 
         $this->gpsConfiguration
             ->expects($this->atLeast(1))

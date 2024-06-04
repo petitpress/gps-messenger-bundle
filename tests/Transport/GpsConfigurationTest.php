@@ -62,22 +62,8 @@ final class GpsConfigurationTest extends TestCase
                     ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
                 ),
             ],
-            'Custom topic/subscription name configured through dsn #2 (deprecated queue[name])' => [
-                'dsn' => 'gps://default?topic[name]=topic_name&queue[name]=subscription_name',
-                'options' => [],
-                'expectedConfiguration' => new GpsConfiguration(
-                    'topic_name',
-                    true,
-                    'subscription_name',
-                    true,
-                    [],
-                    [],
-                    [],
-                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
-                ),
-            ],
-            'Custom topic/subscription name configured through dsn #3' => [
-                'dsn' => 'gps://default?topic[name]=topic_name&topic[options][labels][]=label_topic1&subscription[name]=subscription_name&subscription[options][labels][]=label_subscription1&subscription[options][enableMessageOrdering]=1&subscription[options][ackDeadlineSeconds]=100&max_messages_pull=5&client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com',
+            'Custom topic/subscription name configured through dsn #2' => [
+                'dsn' => 'gps://default?topic[name]=topic_name&topic[options][labels][]=label_topic1&subscription[name]=subscription_name&subscription[options][labels][]=label_subscription1&subscription[options][enableMessageOrdering]=1&subscription[options][ackDeadlineSeconds]=100&&subscription[pull][maxMessages]=5&client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com',
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
@@ -139,11 +125,13 @@ final class GpsConfigurationTest extends TestCase
                             'enableMessageOrdering' => true,
                             'ackDeadlineSeconds' => 100,
                         ],
+                        'pull' => [
+                            'maxMessages' => 5
+                        ],
                     ],
                     'client_config' => [
                         'apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com',
                     ],
-                    'max_messages_pull' => 5,
                 ],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name1',
@@ -156,21 +144,7 @@ final class GpsConfigurationTest extends TestCase
                     ['maxMessages' => 5, 'returnImmediately' => false]
                 ),
             ],
-            'Custom subscription pull options configured through dsn #1 (deprecated max_messages_pull)' => [
-                'dsn' => 'gps://default?max_messages_pull=5',
-                'options' => [],
-                'expectedConfiguration' => new GpsConfiguration(
-                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    true,
-                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
-                    true,
-                    [],
-                    [],
-                    [],
-                    ['maxMessages' => 5, 'returnImmediately' => false]
-                ),
-            ],
-            'Custom subscription pull options configured through dsn #2' => [
+            'Custom subscription pull options configured through dsn #1' => [
                 'dsn' => 'gps://default?subscription[pull][maxMessages]=5',
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
@@ -208,10 +182,10 @@ final class GpsConfigurationTest extends TestCase
             'Custom subscription pull options configured through options #2' => [
                 'dsn' => 'gps://default',
                 'options' => [
-                    'max_messages_pull' => 5,
                     'subscription' => [
                         'pull' => [
                             'returnImmediately' => true,
+                            'maxMessages' => 5,
                         ]
                     ],
                 ],
