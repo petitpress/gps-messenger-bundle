@@ -6,6 +6,8 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 
 use Google\Cloud\PubSub\PubSubClient;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
+use Symfony\Component\Messenger\Transport\Sender\SenderInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -18,8 +20,8 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
-    private GpsReceiver $receiver;
-    private GpsSender $sender;
+    private ReceiverInterface $receiver;
+    private SenderInterface $sender;
 
     public function __construct(
         PubSubClient $pubSubClient,
@@ -63,7 +65,7 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
         return $this->getSender()->send($envelope);
     }
 
-    public function getReceiver(): GpsReceiver
+    public function getReceiver(): ReceiverInterface
     {
         /** @psalm-suppress RedundantPropertyInitializationCheck */
         if (isset($this->receiver)) {
@@ -75,7 +77,7 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
         return $this->receiver;
     }
 
-    public function getSender(): GpsSender
+    public function getSender(): SenderInterface
     {
         /** @psalm-suppress RedundantPropertyInitializationCheck */
         if (isset($this->sender)) {
