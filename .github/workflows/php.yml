@@ -12,6 +12,7 @@ jobs:
         php-version:
           - '8.2'
           - '8.3'
+          - '8.4'
         platform: [ubuntu-latest]
     name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
@@ -40,7 +41,10 @@ jobs:
       - name: Run style tests
         run: vendor/bin/ecs check -vv
         
-      - name: Run static analyse tests
+      - name: Run static analyse phpstan
+        run: vendor/bin/phpstan analyse --error-format=github
+        
+      - name: Run static analyse psalm
         run: vendor/bin/psalm --php-version=${{ matrix.php-version }}
         
       - name: Run unit tests

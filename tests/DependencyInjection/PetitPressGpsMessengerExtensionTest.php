@@ -27,11 +27,11 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
         $config = $this->getSimpleConfig();
         $loader->load([$config], $this->configuration);
 
-        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
+        static::assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
         $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
-        $this->assertInstanceOf(Reference::class, $cacheArgument);
-        $this->assertEquals('cache.app', (string) $cacheArgument);
+        static::assertInstanceOf(Reference::class, $cacheArgument);
+        static::assertEquals('cache.app', (string) $cacheArgument);
     }
 
     /**
@@ -50,22 +50,22 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
         $config = $this->getFullConfig();
         $loader->load([$config], $this->configuration);
 
-        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
+        static::assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
         $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
-        $this->assertInstanceOf(Reference::class, $cacheArgument);
-        $this->assertEquals('foo', (string) $cacheArgument);
+        static::assertInstanceOf(Reference::class, $cacheArgument);
+        static::assertEquals('foo', (string) $cacheArgument);
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    private function getFullConfig()
+    private function getFullConfig(): array
     {
         $yaml = <<<EOF
 auth_cache: 'foo'
 EOF;
-
+        /** @var array<string, mixed> */
         return (new Parser())->parse($yaml);
     }
 
@@ -77,9 +77,9 @@ EOF;
         $config = $this->getDisabledCacheConfig();
         $loader->load([$config], $this->configuration);
 
-        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
+        static::assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
         $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
-        $this->assertNull($gpsTransportFactoryDefinition->getArgument(1));
+        static::assertNull($gpsTransportFactoryDefinition->getArgument(1));
     }
 
     /**

@@ -27,9 +27,12 @@ class GpsTransportFactoryTest extends TestCase
      */
     public function testSupports(bool $expected, string $dsn): void
     {
-        $this->assertSame($expected, $this->subject->supports($dsn, []));
+        static::assertSame($expected, $this->subject->supports($dsn, []));
     }
 
+    /**
+     * @return array<array-key, array{bool, string}>
+     */
     public static function dsnProvider(): array
     {
         return [

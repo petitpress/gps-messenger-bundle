@@ -24,13 +24,17 @@ final class GpsConfigurationTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     * @param array<string, mixed>                     $options
      */
     public function testResolve(string $dsn, array $options, GpsConfigurationInterface $expectedConfiguration): void
     {
         $configuration = $this->gpsConfigurationResolver->resolve($dsn, $options);
-        $this->assertEquals($expectedConfiguration, $configuration);
+        static::assertEquals($expectedConfiguration, $configuration);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function dataProvider(): array
     {
         return [

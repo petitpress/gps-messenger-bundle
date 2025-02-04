@@ -31,7 +31,9 @@ final class GpsTransportFactory implements TransportFactoryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<mixed> $options
+     *
+     * @return GpsTransport
      */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
@@ -39,6 +41,9 @@ final class GpsTransportFactory implements TransportFactoryInterface
 
         $clientConfig = $options->getClientConfig();
         if ($this->cache instanceof CacheItemPoolInterface) {
+            if (! is_array($clientConfig['credentialsConfig'])) {
+                $clientConfig['credentialsConfig'] = [];
+            }
             $clientConfig['credentialsConfig']['authCache'] ??= $this->cache;
         }
         if (isset($this->forcedTransport)) {
@@ -53,7 +58,7 @@ final class GpsTransportFactory implements TransportFactoryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<mixed> $options
      */
     public function supports(string $dsn, array $options): bool
     {
