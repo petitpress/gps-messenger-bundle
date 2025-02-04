@@ -48,7 +48,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: vendor
-          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}-${{ matrix.symfony-version }}
+          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}-${{ matrix.symfony-version }}
           restore-keys: |
             composer-${{ runner.os }}-${{ matrix.php-version }}-
 
