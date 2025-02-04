@@ -55,6 +55,7 @@ framework:
 ```
 
 ### Step 3: Configure Symfony Messenger
+
 ```yaml
 # config/packages/messenger.yaml
 
@@ -129,6 +130,7 @@ petit_press_gps_messenger:
   Can be very useful when used together with [subscription filters](https://cloud.google.com/pubsub/docs/subscription-message-filter).
 
 ### Step 6: Create topics from config
+
 ```bash
 bin/console messenger:setup-transports
 ```
