@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: PHP ${{ matrix.php-version }} ${{ matrix.symfony-version }}
+    name: PHP ${{ matrix.php-version }} Sf ${{ matrix.symfony-version }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -29,32 +29,32 @@ jobs:
             symfony-version: 7.2.*
           - php-version: 8.4
             symfony-version: 7.2.*
-        platform: [ubuntu-latest]
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: "Setup PHP"
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          tools: composer:v2
 
       - name: Validate composer.json
         run: composer validate
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.symfony-version }}-${{ matrix.php-version }}
+          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}-${{ matrix.symfony-version }}
           restore-keys: |
-            ${{ runner.os }}-composer-
+            composer-${{ runner.os }}-${{ matrix.php-version }}-
 
       - name: Install dependencies
         env:
-          SYMFONY_REQUIRE: ${{ matrix.symfony-versions }}
+          SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
         if: steps.composer-cache.outputs.cache-hit != 'true'  
         run: composer update --prefer-dist --no-progress --no-ansi --no-interaction --no-scripts
 
