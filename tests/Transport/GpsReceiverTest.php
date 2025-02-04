@@ -60,19 +60,19 @@ class GpsReceiverTest extends TestCase
         $gpsMessage = new Message(['data' => '']);
 
         $this->gpsConfigurationMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getSubscriptionName')
             ->willReturn(self::SUBSCRIPTION_NAME)
         ;
 
         $this->subscriptionMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('modifyAckDeadline')
             ->with($gpsMessage, 0)
         ;
 
         $this->pubSubClientMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('subscription')
             ->with(self::SUBSCRIPTION_NAME)
             ->willReturn($this->subscriptionMock)

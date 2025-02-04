@@ -118,18 +118,26 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         );
     }
 
+    /**
+     * @param array<string, mixed>  $options
+     *
+     * @return array<int|string, mixed>
+     */
     private function getMergedOptions(string $dsn, array $options): array
     {
         $dnsOptions = [];
         $parsedDnsOptions = parse_url($dsn);
 
         $dsnQueryOptions = $parsedDnsOptions['query'] ?? null;
-        if ($dsnQueryOptions) {
+        if ($dsnQueryOptions !== null && $dsnQueryOptions !== '') {
             parse_str($dsnQueryOptions, $dnsOptions);
         }
 
         $dnsPathOption = $parsedDnsOptions['path'] ?? null;
-        if ($dnsPathOption) {
+        if ($dnsPathOption !== null && $dnsPathOption !== '') {
+            if (! isset($dnsOptions['topic']) || ! is_array($dnsOptions['topic'])) {
+                $dnsOptions['topic'] = [];
+            }
             $dnsOptions['topic']['name'] = substr($dnsPathOption, 1);
         }
 

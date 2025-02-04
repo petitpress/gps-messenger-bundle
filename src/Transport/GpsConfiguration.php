@@ -13,11 +13,33 @@ final class GpsConfiguration implements GpsConfigurationInterface
     private bool   $topicCreationEnabled;
     private string $subscriptionName;
     private bool   $subscriptionCreationEnabled;
+
+    /**
+     * @var array<string, mixed>
+     */
     private array  $clientConfig;
+
+    /**
+     * @var array<string, mixed>
+     */
     private array  $topicOptions;
+
+    /**
+     * @var array<string, mixed>
+     */
     private array  $subscriptionOptions;
+
+    /**
+     * @var array<string, mixed>
+     */
     private array  $subscriptionPullOptions;
 
+    /**
+     * @param array<string, mixed>  $clientConfig
+     * @param array<string, mixed>  $topicOptions
+     * @param array<string, mixed>  $subscriptionOptions
+     * @param array<string, mixed>  $subscriptionPullOptions
+     */
     public function __construct(
         string $topicName,
         bool $topicCreationEnabled,

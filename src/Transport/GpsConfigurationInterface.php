@@ -23,21 +23,25 @@ interface GpsConfigurationInterface
 
     /**
      * @see PubSubClient constructor options
+     * @return array<string, mixed>
      */
     public function getClientConfig(): array;
 
     /**
      * @see Topic::create options
+     * @return array<string, mixed>
      */
     public function getTopicOptions(): array;
 
     /**
      * @see Subscription::create options
+     * @return array<string, mixed>
      */
     public function getSubscriptionOptions(): array;
 
     /**
      * @see Subscription::pull options
+     * @return array<string, mixed>
      */
     public function getSubscriptionPullOptions(): array;
 }

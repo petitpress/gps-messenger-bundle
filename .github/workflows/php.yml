@@ -7,41 +7,65 @@ on:
 
 jobs:
   build:
+    name: PHP ${{ matrix.php-version }} Sf ${{ matrix.symfony-version }}
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        php-version:
-          - '8.2'
-          - '8.3'
-        platform: [ubuntu-latest]
-    name: PHP ${{ matrix.php-version }}
-    runs-on: ubuntu-latest
+        include:
+          - php-version: 8.2
+            symfony-version: 5.4.*
+          - php-version: 8.3
+            symfony-version: 5.4.*
+          - php-version: 8.2
+            symfony-version: 6.4.*
+          - php-version: 8.3
+            symfony-version: 6.4.*
+          - php-version: 8.4
+            symfony-version: 6.4.*
+          - php-version: 8.2
+            symfony-version: 7.2.*
+          - php-version: 8.3
+            symfony-version: 7.2.*
+          - php-version: 8.4
+            symfony-version: 7.2.*
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: nanasess/setup-php@master
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup PHP"
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          tools: composer:v2
 
       - name: Validate composer.json
         run: composer validate
 
       - name: Cache Composer packages
         id: composer-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}-${{ matrix.php-version }}
+          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}-${{ matrix.symfony-version }}
           restore-keys: |
-            ${{ runner.os }}-composer-
+            composer-${{ runner.os }}-${{ matrix.php-version }}-
 
       - name: Install dependencies
-        if: steps.composer-cache.outputs.cache-hit != 'true'
-        run: composer install --prefer-dist --no-progress --no-suggest --no-ansi --no-interaction --no-scripts
+        env:
+          SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
+        if: steps.composer-cache.outputs.cache-hit != 'true'  
+        run: composer update --prefer-dist --no-progress --no-ansi --no-interaction --no-scripts
+
+      - name: Run unit tests
+        run: vendor/bin/phpunit
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv
         
-      - name: Run static analyse tests
-        run: vendor/bin/psalm --php-version=${{ matrix.php-version }}
+      - name: Run static analyse phpstan
+        run: vendor/bin/phpstan analyse --error-format=github
         
-      - name: Run unit tests
-        run: vendor/bin/phpunit
+      - name: Run static analyse psalm
+        run: vendor/bin/psalm --php-version=${{ matrix.php-version }}

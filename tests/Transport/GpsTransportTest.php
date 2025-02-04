@@ -57,7 +57,7 @@ class GpsTransportTest extends TestCase
 
     public function testGet(): void
     {
-        $this->assertInstanceOf(Generator::class, $this->subject->get());
+        static::assertInstanceOf(Generator::class, $this->subject->get());
     }
 
     public function testAck(): void
@@ -96,7 +96,7 @@ class GpsTransportTest extends TestCase
         $envelope = new Envelope($message, [$transportConfiguration]);
 
         $this->serializerMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('encode')
             ->willReturn(
                 [
@@ -107,80 +107,80 @@ class GpsTransportTest extends TestCase
 
         $topicMock = $this->createMock(Topic::class);
         $topicMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('publish');
 
         $this->pubSubClient
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('topic')
             ->willReturn($topicMock);
 
         $finalEnvelop = $this->subject->send($envelope);
 
-        $this->assertInstanceOf(Envelope::class, $finalEnvelop);
+        static::assertSame($message, $finalEnvelop->getMessage());
     }
 
-    public function testSetup()
+    public function testSetup(): void
     {
         $subscription = 'test';
 
         $this->gpsConfiguration
-            ->expects($this->atLeast(2))
+            ->expects(static::atLeast(2))
             ->method('getTopicName')
             ->willReturn($subscription);
 
         $this->gpsConfiguration
-            ->expects($this->atLeast(2))
+            ->expects(static::atLeast(2))
             ->method('getSubscriptionName')
             ->willReturn($subscription);
 
         $this->gpsConfiguration
-            ->expects($this->atLeast(1))
+            ->expects(static::atLeast(1))
             ->method('isTopicCreationEnabled')
             ->willReturn(true);
 
         $this->gpsConfiguration
-            ->expects($this->atLeast(1))
+            ->expects(static::atLeast(1))
             ->method('isSubscriptionCreationEnabled')
             ->willReturn(true);
 
         $topicMock = $this->createMock(Topic::class);
         $topicMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('exists')
             ->willReturn(false);
 
         $subscriptionMock = $this->createMock(Subscription::class);
         $subscriptionMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('exists')
             ->willReturn(false);
 
         $topicMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('subscription')
             ->willReturn($subscriptionMock);
 
         $this->pubSubClient
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('topic')
             ->willReturn($topicMock);
 
         $this->pubSubClient
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('createTopic')
             ->willReturn($topicMock);
 
         $this->subject->setup();
     }
 
-    public function testGetReceiver()
+    public function testGetReceiver(): void
     {
-        $this->assertInstanceOf(GpsReceiver::class, $this->subject->getReceiver());
+        static::assertInstanceOf(GpsReceiver::class, $this->subject->getReceiver());
     }
 
-    public function testGetSender()
+    public function testGetSender(): void
     {
-        $this->assertInstanceOf(GpsSender::class, $this->subject->getSender());
+        static::assertInstanceOf(GpsSender::class, $this->subject->getSender());
     }
 }
