@@ -41,7 +41,7 @@ final class GpsTransportFactory implements TransportFactoryInterface
 
         $clientConfig = $options->getClientConfig();
         if ($this->cache instanceof CacheItemPoolInterface) {
-            if (! is_array($clientConfig['credentialsConfig'])) {
+            if (! isset($clientConfig['credentialsConfig']) || ! is_array($clientConfig['credentialsConfig'])) {
                 $clientConfig['credentialsConfig'] = [];
             }
             $clientConfig['credentialsConfig']['authCache'] ??= $this->cache;
