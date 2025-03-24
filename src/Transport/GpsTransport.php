@@ -26,11 +26,13 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ReceiverInterface $receiver,
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->receiver = $receiver;
     }
 
     /**
@@ -67,13 +69,12 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
 
     public function getReceiver(): ReceiverInterface
     {
-        /** @psalm-suppress RedundantPropertyInitializationCheck */
-        if (isset($this->receiver)) {
-            return $this->receiver;
-        }
-
-        $this->receiver = new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
-
+//        /** @psalm-suppress RedundantPropertyInitializationCheck */
+//        if (isset($this->receiver)) {
+//            return $this->receiver;
+//        }
+//
+//        $this->receiver = new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
         return $this->receiver;
     }
 

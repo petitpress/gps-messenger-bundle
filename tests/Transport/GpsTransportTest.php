@@ -19,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use stdClass;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 class GpsTransportTest extends TestCase
@@ -42,16 +43,23 @@ class GpsTransportTest extends TestCase
      */
     private MockObject $serializerMock;
 
+    /**
+     * @var ReceiverInterface&MockObject
+     */
+    private MockObject $receiverMock;
+
     protected function setUp(): void
     {
         $this->pubSubClient = $this->createMock(PubSubClient::class);
         $this->gpsConfiguration = $this->createMock(GpsConfigurationInterface::class);
         $this->serializerMock = $this->createMock(SerializerInterface::class);
+        $this->receiverMock = $this->createMock(ReceiverInterface::class);
 
         $this->subject = new GpsTransport(
             $this->pubSubClient,
             $this->gpsConfiguration,
-            $this->serializerMock
+            $this->serializerMock,
+            $this->receiverMock
         );
     }
 
@@ -62,18 +70,24 @@ class GpsTransportTest extends TestCase
 
     public function testAck(): void
     {
-        $this->expectException(TransportException::class);
-        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+        $envelope = new Envelope(new stdClass());
+        $this->receiverMock
+            ->expects(static::once())
+            ->method('ack')
+            ->with($envelope);
 
-        $this->subject->ack(new Envelope(new stdClass()));
+        $this->subject->ack($envelope);
     }
 
     public function testReject(): void
     {
-        $this->expectException(TransportException::class);
-        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+        $envelope = new Envelope(new stdClass());
+        $this->receiverMock
+            ->expects(static::once())
+            ->method('reject')
+            ->with($envelope);
 
-        $this->subject->reject(new Envelope(new stdClass()));
+        $this->subject->reject($envelope);
     }
 
     public function testSend(): void
@@ -172,15 +186,5 @@ class GpsTransportTest extends TestCase
             ->willReturn($topicMock);
 
         $this->subject->setup();
-    }
-
-    public function testGetReceiver(): void
-    {
-        static::assertInstanceOf(GpsReceiver::class, $this->subject->getReceiver());
-    }
-
-    public function testGetSender(): void
-    {
-        static::assertInstanceOf(GpsSender::class, $this->subject->getSender());
     }
 }
