@@ -19,10 +19,10 @@ use Throwable;
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsReceiver implements ReceiverInterface
+class GpsReceiver implements ReceiverInterface
 {
-    private PubSubClient $pubSubClient;
-    private GpsConfigurationInterface $gpsConfiguration;
+    protected PubSubClient $pubSubClient;
+    protected GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
 
     public function __construct(
@@ -94,7 +94,7 @@ final class GpsReceiver implements ReceiverInterface
         }
     }
 
-    private function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp
+    protected function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp
     {
         $gpsReceivedStamp = $envelope->last(GpsReceivedStamp::class);
         if ($gpsReceivedStamp instanceof GpsReceivedStamp) {

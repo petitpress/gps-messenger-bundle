@@ -15,7 +15,7 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsTransport implements TransportInterface, SetupableTransportInterface
+class GpsTransport implements TransportInterface, SetupableTransportInterface
 {
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
