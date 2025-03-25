@@ -67,7 +67,7 @@ final class GpsConfigurationTest extends TestCase
                 ),
             ],
             'Custom topic/subscription name configured through dsn #2' => [
-                'dsn' => 'gps://default?topic[name]=topic_name&topic[options][labels][]=label_topic1&subscription[name]=subscription_name&subscription[options][labels][]=label_subscription1&subscription[options][enableMessageOrdering]=1&subscription[options][ackDeadlineSeconds]=100&&subscription[pull][maxMessages]=5&client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com',
+                'dsn' => 'gps://default?topic[name]=topic_name&topic[options][labels][]=label_topic1&subscription[name]=subscription_name&subscription[options][labels][]=label_subscription1&subscription[options][enableMessageOrdering]=1&subscription[options][ackDeadlineSeconds]=100&subscription[options][deadLetterPolicy][deadLetterTopic]=dead_letter_topic1&subscription[options][deadLetterPolicy][maxDeliveryAttempts]=5&subscription[pull][maxMessages]=5&client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com',
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
@@ -76,7 +76,15 @@ final class GpsConfigurationTest extends TestCase
                     true,
                     ['apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com'],
                     ['labels' => ['label_topic1']],
-                    ['labels' => ['label_subscription1'], 'enableMessageOrdering' => true, 'ackDeadlineSeconds' => 100],
+                    [
+                        'labels' => ['label_subscription1'],
+                        'enableMessageOrdering' => true,
+                        'ackDeadlineSeconds' => 100,
+                        'deadLetterPolicy' => [
+                            'deadLetterTopic' => 'dead_letter_topic1',
+                            'maxDeliveryAttempts' => 5,
+                        ],
+                    ],
                     ['maxMessages' => 5, 'returnImmediately' => false]
                 ),
             ],
@@ -128,6 +136,10 @@ final class GpsConfigurationTest extends TestCase
                             'labels' => ['label_subscription1'],
                             'enableMessageOrdering' => true,
                             'ackDeadlineSeconds' => 100,
+                            'deadLetterPolicy' => [
+                                'deadLetterTopic' => 'dead_letter_topic1',
+                                'maxDeliveryAttempts' => 5,
+                            ],
                         ],
                         'pull' => [
                             'maxMessages' => 5
@@ -144,7 +156,15 @@ final class GpsConfigurationTest extends TestCase
                     true,
                     ['apiEndpoint' => 'https://europe-west3-pubsub.googleapis.com'],
                     ['labels' => ['label_topic1']],
-                    ['labels' => ['label_subscription1'], 'enableMessageOrdering' => true, 'ackDeadlineSeconds' => 100],
+                    [
+                        'labels' => ['label_subscription1'],
+                        'enableMessageOrdering' => true,
+                        'ackDeadlineSeconds' => 100,
+                        'deadLetterPolicy' => [
+                            'deadLetterTopic' => 'dead_letter_topic1',
+                            'maxDeliveryAttempts' => 5,
+                        ],
+                    ],
                     ['maxMessages' => 5, 'returnImmediately' => false]
                 ),
             ],
