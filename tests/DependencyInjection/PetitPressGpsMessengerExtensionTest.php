@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DependencyInjection;
+namespace PetitPress\GpsMessengerBundle\Tests\DependencyInjection;
 
 use PetitPress\GpsMessengerBundle\DependencyInjection\PetitPressGpsMessengerExtension;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
