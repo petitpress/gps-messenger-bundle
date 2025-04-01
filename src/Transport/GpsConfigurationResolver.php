@@ -90,7 +90,6 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                                     ->setDefault('maxMessages', self::DEFAULT_MAX_MESSAGES_PULL)
                                     ->setDefault('returnImmediately', false)
                                     ->setDefined('timeoutMillis')
-                                    ->setAllowedTypes('timeoutMillis', 'int')
                                 ;
                             }
                         )
