@@ -19,7 +19,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         self::BOOL_NORMALIZER_KEY => ['enableMessageOrdering', 'retainAckedMessages', 'enableExactlyOnceDelivery'],
     ];
     private const NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS = [
-        self::INT_NORMALIZER_KEY => ['maxMessages'],
+        self::INT_NORMALIZER_KEY => ['maxMessages', 'timeoutMillis'],
         self::BOOL_NORMALIZER_KEY => ['returnImmediately'],
     ];
 
@@ -32,33 +32,17 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
         unset($options['transport_name'], $options['serializer']);
 
         $subscriptionOptionsNormalizer = static function (Options $options, $data) {
-            foreach ($data ?? [] as $optionName => $optionValue) {
-                switch ($optionName) {
-                    case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_OPTIONS[self::INT_NORMALIZER_KEY], true):
-                        $data[$optionName] = (int) filter_var($optionValue, FILTER_SANITIZE_NUMBER_INT);
-                        break;
-                    case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_OPTIONS[self::BOOL_NORMALIZER_KEY], true):
-                        $data[$optionName] = filter_var($optionValue, FILTER_VALIDATE_BOOLEAN);
-                        break;
-                }
-            }
-
-            return $data;
+            return self::normalizeOptions(
+                $data ?? [],
+                self::NORMALIZABLE_SUBSCRIPTION_OPTIONS
+            );
         };
 
         $subscriptionPullOptionsNormalizer = static function (Options $options, $data) {
-            foreach ($data ?? [] as $optionName => $optionValue) {
-                switch ($optionName) {
-                    case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS[self::INT_NORMALIZER_KEY], true):
-                        $data[$optionName] = (int) filter_var($optionValue, FILTER_SANITIZE_NUMBER_INT);
-                        break;
-                    case \in_array($optionName, self::NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS[self::BOOL_NORMALIZER_KEY], true):
-                        $data[$optionName] = filter_var($optionValue, FILTER_VALIDATE_BOOLEAN);
-                        break;
-                }
-            }
-
-            return $data;
+            return self::normalizeOptions(
+                $data ?? [],
+                self::NORMALIZABLE_SUBSCRIPTION_PULL_OPTIONS
+            );
         };
 
         $mergedOptions = $this->getMergedOptions($dsn, $options);
@@ -117,6 +101,34 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $resolvedOptions['subscription']['options'],
             $resolvedOptions['subscription']['pull']
         );
+    }
+
+    /**
+     * @param array<mixed, mixed> $data
+     * @param array<string, array<array-key, string>> $normalizationRules
+     *
+     * @return array<string, mixed>
+     */
+    private static function normalizeOptions(array $data, array $normalizationRules): array
+    {
+        foreach ($data as $optionName => &$optionValue) {
+            if (\is_array($optionValue)) {
+                // normalize nested arrays
+                $optionValue = self::normalizeOptions($optionValue, $normalizationRules);
+                continue;
+            }
+
+            switch (true) {
+                case \in_array($optionName, $normalizationRules[self::INT_NORMALIZER_KEY], true):
+                    $optionValue = (int) filter_var($optionValue, FILTER_SANITIZE_NUMBER_INT);
+                    break;
+                case \in_array($optionName, $normalizationRules[self::BOOL_NORMALIZER_KEY], true):
+                    $optionValue = filter_var($optionValue, FILTER_VALIDATE_BOOLEAN);
+                    break;
+            }
+        }
+
+        return $data;
     }
 
     /**
