@@ -31,6 +31,12 @@ final class GpsConfigurationTest extends TestCase
     {
         $configuration = $this->gpsConfigurationResolver->resolve($dsn, $options);
         static::assertEquals($expectedConfiguration, $configuration);
+        static::assertSame($expectedConfiguration->getClientConfig(), $configuration->getClientConfig());
+        static::assertSame($expectedConfiguration->getSubscriptionPullOptions(), $configuration->getSubscriptionPullOptions());
+        static::assertSame($expectedConfiguration->getSubscriptionOptions(), $configuration->getSubscriptionOptions());
+        static::assertSame($expectedConfiguration->getSubscriptionName(), $configuration->getSubscriptionName());
+        static::assertSame($expectedConfiguration->getTopicName(), $configuration->getTopicName());
+        static::assertSame($expectedConfiguration->getTopicOptions(), $configuration->getTopicOptions());
     }
 
     /**
@@ -68,7 +74,7 @@ final class GpsConfigurationTest extends TestCase
                 ),
             ],
             'Custom topic/subscription name configured through dsn #2' => [
-                'dsn' => 'gps://default?topic[name]=topic_name&topic[options][labels][]=label_topic1&subscription[name]=subscription_name&subscription[options][labels][]=label_subscription1&subscription[options][enableMessageOrdering]=1&subscription[options][ackDeadlineSeconds]=100&subscription[options][deadLetterPolicy][deadLetterTopic]=dead_letter_topic1&subscription[options][deadLetterPolicy][maxDeliveryAttempts]=5&subscription[pull][maxMessages]=5&client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com',
+                'dsn' => 'gps://default?topic[name]=topic_name&topic[options][labels][]=label_topic1&subscription[name]=subscription_name&subscription[options][labels][]=label_subscription1&subscription[options][enableMessageOrdering]=1&subscription[options][ackDeadlineSeconds]=100&subscription[options][deadLetterPolicy][deadLetterTopic]=dead_letter_topic1&subscription[options][deadLetterPolicy][maxDeliveryAttempts]=5&subscription[pull][maxMessages]=5&subscription[pull][timeoutMillis]=6000&client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com',
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     'topic_name',
@@ -86,7 +92,7 @@ final class GpsConfigurationTest extends TestCase
                             'maxDeliveryAttempts' => 5,
                         ],
                     ],
-                    ['maxMessages' => 5, 'returnImmediately' => false]
+                    ['returnImmediately' => false, 'maxMessages' => 5, 'timeoutMillis' => 6000]
                 ),
             ],
             'Custom topic/subscription name configured through options #1' => [
@@ -143,7 +149,8 @@ final class GpsConfigurationTest extends TestCase
                             ],
                         ],
                         'pull' => [
-                            'maxMessages' => 5
+                            'maxMessages' => 5,
+                            'timeoutMillis' => 6000
                         ],
                     ],
                     'client_config' => [
@@ -166,11 +173,11 @@ final class GpsConfigurationTest extends TestCase
                             'maxDeliveryAttempts' => 5,
                         ],
                     ],
-                    ['maxMessages' => 5, 'returnImmediately' => false]
+                    ['returnImmediately' => false, 'maxMessages' => 5, 'timeoutMillis' => 6000]
                 ),
             ],
             'Custom subscription pull options configured through dsn #1' => [
-                'dsn' => 'gps://default?subscription[pull][maxMessages]=5',
+                'dsn' => 'gps://default?subscription[pull][maxMessages]=5&subscription[pull][timeoutMillis]=6000',
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
@@ -180,7 +187,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 5, 'returnImmediately' => false]
+                    ['returnImmediately' => false, 'maxMessages' => 5, 'timeoutMillis' => 6000]
                 ),
             ],
             'Custom subscription pull options configured through options #1' => [
@@ -189,6 +196,7 @@ final class GpsConfigurationTest extends TestCase
                     'subscription' => [
                         'pull' => [
                             'maxMessages' => 5,
+                            'timeoutMillis' => 6000,
                             'returnImmediately' => true,
                         ]
                     ],
@@ -201,7 +209,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 5, 'returnImmediately' => true]
+                    ['maxMessages' => 5, 'returnImmediately' => true, 'timeoutMillis' => 6000, ]
                 ),
             ],
             'Custom subscription pull options configured through options #2' => [
@@ -211,6 +219,7 @@ final class GpsConfigurationTest extends TestCase
                         'pull' => [
                             'returnImmediately' => true,
                             'maxMessages' => 5,
+                            'timeoutMillis' => 6000,
                         ]
                     ],
                 ],
@@ -222,7 +231,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 5, 'returnImmediately' => true]
+                    ['maxMessages' => 5, 'returnImmediately' => true, 'timeoutMillis' => 6000, ]
                 ),
             ],
             'Subscription is not created' => [
