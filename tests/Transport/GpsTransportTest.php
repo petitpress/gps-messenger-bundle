@@ -120,6 +120,14 @@ class GpsTransportTest extends TestCase
         static::assertSame($message, $finalEnvelop->getMessage());
     }
 
+    public function testKeepalive(): void
+    {
+        $this->expectException(TransportException::class);
+        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+
+        $this->subject->keepalive(new Envelope(new stdClass()));
+    }
+
     public function testSetup(): void
     {
         $subscription = 'test';
