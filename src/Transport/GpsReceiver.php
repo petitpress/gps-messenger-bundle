@@ -12,27 +12,22 @@ use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
-use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
+use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Throwable;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-class GpsReceiver implements ReceiverInterface
+final class GpsReceiver implements KeepaliveReceiverInterface
 {
-    protected PubSubClient $pubSubClient;
-    protected GpsConfigurationInterface $gpsConfiguration;
-    private SerializerInterface $serializer;
+    public const DEFAULT_KEEPALIVE_SECONDS = 5;
 
     public function __construct(
-        PubSubClient $pubSubClient,
-        GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        private PubSubClient $pubSubClient,
+        private GpsConfigurationInterface $gpsConfiguration,
+        private SerializerInterface $serializer
     ) {
-        $this->pubSubClient = $pubSubClient;
-        $this->gpsConfiguration = $gpsConfiguration;
-        $this->serializer = $serializer;
     }
 
     /**
@@ -94,7 +89,7 @@ class GpsReceiver implements ReceiverInterface
         }
     }
 
-    protected function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp
+    private function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp
     {
         $gpsReceivedStamp = $envelope->last(GpsReceivedStamp::class);
         if ($gpsReceivedStamp instanceof GpsReceivedStamp) {
@@ -118,5 +113,19 @@ class GpsReceiver implements ReceiverInterface
         }
 
         return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+    }
+
+    public function keepalive(Envelope $envelope, ?int $seconds = null): void
+    {
+        try {
+            $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
+
+            $this->pubSubClient
+                ->subscription($this->gpsConfiguration->getSubscriptionName())
+                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), $seconds ?? self::DEFAULT_KEEPALIVE_SECONDS)
+            ;
+        } catch (Throwable $exception) {
+            throw new TransportException($exception->getMessage(), 0, $exception);
+        }
     }
 }
