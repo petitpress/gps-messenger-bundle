@@ -6,8 +6,23 @@ This bundle provides a simple implementation of Google Pub/Sub transport for Sym
 The bundle requires only `symfony/messenger`, `google/cloud-pubsub` and `symfony/options-resolver` packages. 
 In contrast with [Enqueue GPS transport](https://github.com/php-enqueue/gps),
 it doesn't require [Enqueue](https://github.com/php-enqueue) 
-and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme). 
-It supports ordering messages with `OrderingKeyStamp` and it's not outdated. 
+and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme).
+
+## Features
+
+- **Compatible with the latest `google/cloud-pubsub` 2.***.
+- **Zero extra dependencies** beyond core Symfony Messenger and Pub/Sub libraries.
+- **Message ordering support** using the `OrderingKeyStamp`.
+- **Flexible and extensive configuration**, available via options or DSN (Data Source Name), including `deadLetterPolicy`, `enableMessageOrdering`, `ackDeadlineSeconds`).
+- **Automatic Pub/Sub Topic and Subscription creation**, with the ability to disable it if needed.
+- **Keep-alive support** for long-running Messenger workers.
+
+## Support
+
+| Version                                                               | Status             | Symfony Versions |
+|-----------------------------------------------------------------------|--------------------|------------------|
+| [3.x](https://github.com/petitpress/gps-messenger-bundle/tree/3.x)    | Actively Supported | >= 5.4, <=7.1    |
+| [4.x](https://github.com/petitpress/gps-messenger-bundle/tree/master) | In development     | >= 7.2           |
 
 ## Installation
 
@@ -32,7 +47,7 @@ as Google needs to access some variables through `getenv`. To do so, use putenv 
 
 List of Google Pub/Sub configurable variables :
 ```dotenv
-# use these for production environemnt:
+# use these for production environment:
 GOOGLE_APPLICATION_CREDENTIALS='google-pubsub-credentials.json'
 GCLOUD_PROJECT='project-id'
 
@@ -69,13 +84,13 @@ framework:
                         apiEndpoint: 'https://europe-west3-pubsub.googleapis.com'
                     topic: # optional (default name: messages)
                         name: 'messages'
-                        options: # optional create options if not exists (default: []), for all options take at look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/topic?method=create
+                        options: # optional create options if not exists (default: []), for all options take at look at https://cloud.google.com/php/docs/reference/cloud-pubsub/latest/Topic#_Google_Cloud_PubSub_Topic__create__
                             labels:
                                 - label1
                                 - label2
                     subscription: # optional (default the same as topic.name)
                         name: 'messages'
-                        options: # optional create options if not exists (default: []), fol all options take a look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/subscription?method=create
+                        options: # optional create options if not exists (default: []), for all options take a look at https://cloud.google.com/php/docs/reference/cloud-pubsub/latest/Subscription#_Google_Cloud_PubSub_Subscription__create__
                             enableExactlyOnceDelivery: true
                             labels:
                                 - label1
@@ -134,3 +149,7 @@ petit_press_gps_messenger:
 ```bash
 bin/console messenger:setup-transports
 ```
+
+## License
+
+This bundle is released under the [MIT License](LICENSE).
