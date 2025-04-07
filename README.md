@@ -11,10 +11,10 @@ and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme).
 ## Features
 
 - **Compatible with the latest `google/cloud-pubsub` 2.***.
-- **Zero extra dependencies** beyond core Symfony Messenger and Pub/Sub libraries.
-- **Message ordering support** using the `OrderingKeyStamp`.
+- **Zero extra dependencies** beyond core Symfony (e.g. `Symfony Messenger`) and Pub/Sub libraries.
 - **Flexible and extensive configuration**, available via options or DSN (Data Source Name), including `deadLetterPolicy`, `enableMessageOrdering`, `ackDeadlineSeconds`).
 - **Automatic Pub/Sub Topic and Subscription creation**, with the ability to disable it if needed.
+- **Message ordering support** using the `OrderingKeyStamp`.
 - **Keep-alive support** for long-running Messenger workers.
 
 ## Support
