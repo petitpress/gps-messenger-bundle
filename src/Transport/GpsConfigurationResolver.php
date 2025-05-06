@@ -49,6 +49,8 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         $optionsResolver = new OptionsResolver();
         $optionsResolver
+            ->setDefault('allow_messages_redelivery', false)
+            ->setAllowedTypes('allow_messages_redelivery', 'bool')
             ->setDefault('client_config', [])
             ->setDefault('topic', function (OptionsResolver $topicResolver): void {
                 $topicResolver
@@ -96,6 +98,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $resolvedOptions['topic']['createIfNotExist'],
             $resolvedOptions['subscription']['name'],
             $resolvedOptions['subscription']['createIfNotExist'],
+            $resolvedOptions['allow_messages_redelivery'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],
