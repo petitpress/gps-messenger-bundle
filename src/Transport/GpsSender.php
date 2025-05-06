@@ -47,10 +47,12 @@ final class GpsSender implements SenderInterface
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
 
-        $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
-        if ($redeliveryStamp instanceof RedeliveryStamp) {
-            // do not try to redeliver, message wasn't acknowledged, so let's Google Pub/Sub do its job with retry policy
-            return $envelope;
+        if (! $this->gpsConfiguration->isMessageRedeliveryAllowed()) {
+            $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
+            if ($redeliveryStamp instanceof RedeliveryStamp) {
+                // do not try to redeliver, message wasn't acknowledged, so let's Google Pub/Sub do its job with retry policy
+                return $envelope;
+            }
         }
 
         $orderingKeyStamp = $envelope->last(OrderingKeyStamp::class);
