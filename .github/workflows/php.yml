@@ -1,6 +1,9 @@
 name: GPS Messenger Bundle CI
 
 on:
+  push:
+    branches:
+      - master
   pull_request:
     branches:
       - master
