@@ -15,7 +15,6 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
 {
     public function testSimpleConfiguration(): void
     {
-
         $configuration = new ContainerBuilder();
         $loader = new PetitPressGpsMessengerExtension();
         $config = $this->getSimpleConfig();
