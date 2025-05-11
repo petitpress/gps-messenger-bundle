@@ -27,8 +27,10 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
         $config = $this->getSimpleConfig();
         $loader->load([$config], $this->configuration);
 
+        static::assertNotNull($this->configuration);
         static::assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
-        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
+        $gpsTransportFactoryDefinition = $this->configuration?->getDefinition(GpsTransportFactory::class);
+        static::assertNotNull($gpsTransportFactoryDefinition);
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
         static::assertInstanceOf(Reference::class, $cacheArgument);
         static::assertEquals('cache.app', (string) $cacheArgument);
@@ -50,8 +52,10 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
         $config = $this->getFullConfig();
         $loader->load([$config], $this->configuration);
 
+        static::assertNotNull($this->configuration);
         static::assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
-        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
+        $gpsTransportFactoryDefinition = $this->configuration?->getDefinition(GpsTransportFactory::class);
+        static::assertNotNull($gpsTransportFactoryDefinition);
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
         static::assertInstanceOf(Reference::class, $cacheArgument);
         static::assertEquals('foo', (string) $cacheArgument);
@@ -77,8 +81,10 @@ EOF;
         $config = $this->getDisabledCacheConfig();
         $loader->load([$config], $this->configuration);
 
+        static::assertNotNull($this->configuration);
         static::assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
-        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
+        $gpsTransportFactoryDefinition = $this->configuration?->getDefinition(GpsTransportFactory::class);
+        static::assertNotNull($gpsTransportFactoryDefinition);
         static::assertNull($gpsTransportFactoryDefinition->getArgument(1));
     }
 
