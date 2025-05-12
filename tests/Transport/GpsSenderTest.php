@@ -79,7 +79,7 @@ class GpsSenderTest extends TestCase
         ;
 
         $this->gpsConfigurationMock
-            ->method('isMessageRedeliveryAllowed')
+            ->method('shouldUseMessengerRetry')
             ->willReturn(false);
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
@@ -98,7 +98,7 @@ class GpsSenderTest extends TestCase
         ;
 
         $this->gpsConfigurationMock
-            ->method('isMessageRedeliveryAllowed')
+            ->method('shouldUseMessengerRetry')
             ->willReturn(true)
         ;
 

@@ -82,7 +82,7 @@ final class GpsReceiver implements KeepaliveReceiverInterface
 
             $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
 
-            if ($this->gpsConfiguration->isMessageRedeliveryAllowed()) {
+            if ($this->gpsConfiguration->shouldUseMessengerRetry()) {
                 $subscription->acknowledge($gpsReceivedStamp->getGpsMessage());
             } else {
                 $subscription->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);

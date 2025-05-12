@@ -47,7 +47,7 @@ final class GpsSender implements SenderInterface
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
 
-        if (! $this->gpsConfiguration->isMessageRedeliveryAllowed()) {
+        if (! $this->gpsConfiguration->shouldUseMessengerRetry()) {
             $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
             if ($redeliveryStamp instanceof RedeliveryStamp) {
                 // do not try to redeliver, message wasn't acknowledged, so let's Google Pub/Sub do its job with retry policy

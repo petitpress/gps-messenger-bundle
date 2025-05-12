@@ -13,7 +13,7 @@ final class GpsConfiguration implements GpsConfigurationInterface
     private bool   $topicCreationEnabled;
     private string $subscriptionName;
     private bool   $subscriptionCreationEnabled;
-    private bool   $messageRedeliveryAllowed;
+    private bool   $useMessengerRetry;
 
     /**
      * @var array<string, mixed>
@@ -46,7 +46,7 @@ final class GpsConfiguration implements GpsConfigurationInterface
         bool $topicCreationEnabled,
         string $subscriptionName,
         bool $subscriptionCreationEnabled,
-        bool $messageRedeliveryAllowed,
+        bool $useMessengerRetry,
         array $clientConfig,
         array $topicOptions,
         array $subscriptionOptions,
@@ -56,7 +56,7 @@ final class GpsConfiguration implements GpsConfigurationInterface
         $this->topicCreationEnabled = $topicCreationEnabled;
         $this->subscriptionName = $subscriptionName;
         $this->subscriptionCreationEnabled = $subscriptionCreationEnabled;
-        $this->messageRedeliveryAllowed = $messageRedeliveryAllowed;
+        $this->useMessengerRetry = $useMessengerRetry;
         $this->clientConfig = $clientConfig;
         $this->topicOptions = $topicOptions;
         $this->subscriptionOptions = $subscriptionOptions;
@@ -83,9 +83,9 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->subscriptionCreationEnabled;
     }
 
-    public function isMessageRedeliveryAllowed(): bool
+    public function shouldUseMessengerRetry(): bool
     {
-        return $this->messageRedeliveryAllowed;
+        return $this->useMessengerRetry;
     }
 
     public function getClientConfig(): array

@@ -356,6 +356,85 @@ final class GpsConfigurationTest extends TestCase
                     ['maxMessages' => 10, 'returnImmediately' => false]
                 ),
             ],
+            'use_messenger_retry is set to true' => [
+                'dsn' => 'gps://default',
+                'options' => [
+                    'use_messenger_retry' => true,
+                ],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    true,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    true,
+                    true,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'use_messenger_retry is set to false' => [
+                'dsn' => 'gps://default',
+                'options' => [
+                    'use_messenger_retry' => false,
+                ],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    true,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    true,
+                    false,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: use_messenger_retry contains true' => [
+                'dsn' => 'gps://default?topic[name]=foo&subscription[name]=bar&use_messenger_retry=true',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    true,
+                    'bar',
+                    true,
+                    true,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: use_messenger_retry contains false' => [
+                'dsn' => 'gps://default?topic[name]=foo&subscription[name]=bar&use_messenger_retry=false',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    true,
+                    'bar',
+                    true,
+                    false,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
+            'DSN: use_messenger_retry contains invalid value' => [
+                'dsn' => 'gps://default?topic[name]=foo&subscription[name]=bar&use_messenger_retry=qux',
+                'options' => [],
+                'expectedConfiguration' => new GpsConfiguration(
+                    'foo',
+                    true,
+                    'bar',
+                    true,
+                    false,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 10, 'returnImmediately' => false]
+                ),
+            ],
         ];
     }
 }

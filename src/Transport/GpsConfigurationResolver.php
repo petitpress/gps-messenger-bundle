@@ -49,8 +49,8 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         $optionsResolver = new OptionsResolver();
         $optionsResolver
-            ->setDefault('allow_messages_redelivery', false)
-            ->setAllowedTypes('allow_messages_redelivery', 'bool')
+            ->setDefault('use_messenger_retry', false)
+            ->setAllowedTypes('use_messenger_retry', 'bool')
             ->setDefault('client_config', [])
             ->setDefault('topic', function (OptionsResolver $topicResolver): void {
                 $topicResolver
@@ -98,7 +98,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $resolvedOptions['topic']['createIfNotExist'],
             $resolvedOptions['subscription']['name'],
             $resolvedOptions['subscription']['createIfNotExist'],
-            $resolvedOptions['allow_messages_redelivery'],
+            $resolvedOptions['use_messenger_retry'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],
@@ -155,6 +155,10 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                 $dnsOptions['topic'] = [];
             }
             $dnsOptions['topic']['name'] = substr($dnsPathOption, 1);
+        }
+
+        if (isset($dnsOptions['use_messenger_retry']) && is_string($dnsOptions['use_messenger_retry'])) {
+            $dnsOptions['use_messenger_retry'] = $this->toBool($dnsOptions['use_messenger_retry'], false);
         }
 
         if (isset($dnsOptions['topic']['createIfNotExist'])) {
