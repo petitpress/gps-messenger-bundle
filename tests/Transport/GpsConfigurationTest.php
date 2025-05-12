@@ -57,7 +57,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL]
                 ),
             ],
             'Custom topic/subscription name configured through dsn #1' => [
@@ -72,7 +72,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL]
                 ),
             ],
             'Custom topic/subscription name configured through dsn #2' => [
@@ -95,7 +95,7 @@ final class GpsConfigurationTest extends TestCase
                             'maxDeliveryAttempts' => 5,
                         ],
                     ],
-                    ['returnImmediately' => false, 'maxMessages' => 5, 'timeoutMillis' => 6000]
+                    ['maxMessages' => 5, 'timeoutMillis' => 6000]
                 ),
             ],
             'Custom topic/subscription name configured through options #1' => [
@@ -112,7 +112,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL]
                 ),
             ],
             'Custom topic/subscription name configured through options #2' => [
@@ -130,7 +130,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL, 'returnImmediately' => false]
+                    ['maxMessages' => GpsConfigurationResolverInterface::DEFAULT_MAX_MESSAGES_PULL]
                 ),
             ],
             'Custom topic/subscription name configured through options #4' => [
@@ -179,7 +179,7 @@ final class GpsConfigurationTest extends TestCase
                             'maxDeliveryAttempts' => 5,
                         ],
                     ],
-                    ['returnImmediately' => false, 'maxMessages' => 5, 'timeoutMillis' => 6000]
+                    ['maxMessages' => 5, 'timeoutMillis' => 6000]
                 ),
             ],
             'Custom subscription pull options configured through dsn #1' => [
@@ -194,7 +194,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['returnImmediately' => false, 'maxMessages' => 5, 'timeoutMillis' => 6000]
+                    ['maxMessages' => 5, 'timeoutMillis' => 6000]
                 ),
             ],
             'Custom subscription pull options configured through options #1' => [
@@ -203,8 +203,8 @@ final class GpsConfigurationTest extends TestCase
                     'subscription' => [
                         'pull' => [
                             'maxMessages' => 5,
-                            'timeoutMillis' => 6000,
                             'returnImmediately' => true,
+                            'timeoutMillis' => 6000,
                         ]
                     ],
                 ],
@@ -243,6 +243,28 @@ final class GpsConfigurationTest extends TestCase
                     ['maxMessages' => 5, 'returnImmediately' => true, 'timeoutMillis' => 6000, ]
                 ),
             ],
+            'Custom subscription pull options configured through options #3' => [
+                'dsn' => 'gps://default',
+                'options' => [
+                    'subscription' => [
+                        'pull' => [
+                            'maxMessages' => 5,
+                            'returnImmediately' => false,
+                            'timeoutMillis' => 6000,
+                        ]
+                    ],
+                ],
+                'expectedConfiguration' => new GpsConfiguration(
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    true,
+                    GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
+                    true,
+                    [],
+                    [],
+                    [],
+                    ['maxMessages' => 5, 'returnImmediately' => false, 'timeoutMillis' => 6000, ]
+                ),
+            ],
             'Subscription is not created' => [
                 'dsn' => 'gps://default',
                 'options' => [
@@ -259,7 +281,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'Topic is not created' => [
@@ -278,7 +300,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: Subscription is not created' => [
@@ -293,7 +315,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: Subscription is not created #2' => [
@@ -308,7 +330,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: Topic is not created' => [
@@ -323,7 +345,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: Topic is not created #2' => [
@@ -338,7 +360,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: createIfNotExist contains invalid value' => [
@@ -432,7 +454,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
         ];
