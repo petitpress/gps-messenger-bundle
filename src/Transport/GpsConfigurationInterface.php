@@ -21,6 +21,8 @@ interface GpsConfigurationInterface
 
     public function isSubscriptionCreationEnabled(): bool;
 
+    public function shouldUseMessengerRetry(): bool;
+
     /**
      * @see PubSubClient constructor options
      * @return array<string, mixed>

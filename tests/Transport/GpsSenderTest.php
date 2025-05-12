@@ -61,7 +61,7 @@ class GpsSenderTest extends TestCase
         );
     }
 
-    public function testItDoesNotPublishIfTheLastStampIsOfTypeRedelivery(): void
+    public function testItDoesNotPublishIfTheLastStampIsOfTypeRedeliveryWithRedeliveryDisabled(): void
     {
         $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
         $envelopeArray = ['body' => []];
@@ -77,6 +77,46 @@ class GpsSenderTest extends TestCase
             ->expects(static::never())
             ->method('topic')
         ;
+
+        $this->gpsConfigurationMock
+            ->method('shouldUseMessengerRetry')
+            ->willReturn(false);
+
+        self::assertSame($envelope, $this->gpsSender->send($envelope));
+    }
+
+    public function testItPublishesIfTheLastStampIsOfTypeRedeliveryWithRedeliveryEnabled(): void
+    {
+        $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
+        $envelopeArray = ['body' => []];
+
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
+
+        $this->gpsConfigurationMock
+            ->method('shouldUseMessengerRetry')
+            ->willReturn(true)
+        ;
+
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
+
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock);
+
+        $this->topicMock
+            ->expects(static::once())
+            ->method('publish');
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }

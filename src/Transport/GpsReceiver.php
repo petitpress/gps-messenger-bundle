@@ -80,10 +80,13 @@ final class GpsReceiver implements KeepaliveReceiverInterface
         try {
             $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
 
-            $this->pubSubClient
-                ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0)
-            ;
+            $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
+
+            if ($this->gpsConfiguration->shouldUseMessengerRetry()) {
+                $subscription->acknowledge($gpsReceivedStamp->getGpsMessage());
+            } else {
+                $subscription->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
+            }
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
