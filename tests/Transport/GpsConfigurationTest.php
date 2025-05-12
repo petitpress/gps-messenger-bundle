@@ -249,7 +249,6 @@ final class GpsConfigurationTest extends TestCase
                     'subscription' => [
                         'pull' => [
                             'maxMessages' => 5,
-                            'returnImmediately' => false,
                             'timeoutMillis' => 6000,
                         ]
                     ],
@@ -259,10 +258,11 @@ final class GpsConfigurationTest extends TestCase
                     true,
                     GpsConfigurationResolverInterface::DEFAULT_TOPIC_NAME,
                     true,
+                    false,
                     [],
                     [],
                     [],
-                    ['maxMessages' => 5, 'returnImmediately' => false, 'timeoutMillis' => 6000, ]
+                    ['maxMessages' => 5, 'timeoutMillis' => 6000, ]
                 ),
             ],
             'Subscription is not created' => [
@@ -375,7 +375,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'use_messenger_retry is set to true' => [
@@ -392,7 +392,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'use_messenger_retry is set to false' => [
@@ -409,7 +409,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: use_messenger_retry contains true' => [
@@ -424,7 +424,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: use_messenger_retry contains false' => [
@@ -439,7 +439,7 @@ final class GpsConfigurationTest extends TestCase
                     [],
                     [],
                     [],
-                    ['maxMessages' => 10, 'returnImmediately' => false]
+                    ['maxMessages' => 10]
                 ),
             ],
             'DSN: use_messenger_retry contains invalid value' => [
