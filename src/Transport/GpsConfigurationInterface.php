@@ -17,9 +17,12 @@ interface GpsConfigurationInterface
 
     public function isTopicCreationEnabled(): bool;
 
+
     public function getSubscriptionName(): string;
 
     public function isSubscriptionCreationEnabled(): bool;
+
+    public function isSubscriptionModificationEnabled(): bool;
 
     public function shouldUseMessengerRetry(): bool;
 
