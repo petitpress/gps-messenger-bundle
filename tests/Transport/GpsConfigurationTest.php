@@ -383,7 +383,7 @@ final class GpsConfigurationTest extends TestCase
                     ['maxMessages' => 10]
                 ),
             ],
-            'DSN: Subscription updated contains invalid value' => [
+            'DSN: Subscription update contains invalid value' => [
                 'dsn' => 'gps://default?topic[name]=foo&subscription[name]=bar&subscription[update]=qux',
                 'options' => [],
                 'expectedConfiguration' => new GpsConfiguration(
