@@ -6,11 +6,9 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 
 use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
-use JsonException;
 use LogicException;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
@@ -108,14 +106,12 @@ final class GpsReceiver implements KeepaliveReceiverInterface
      */
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
-        try {
-            /** @var array<string, mixed> $rawData */
-            $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
-        }
+        $envelope = $this->serializer->decode([
+            'body' => $message->data(),
+            'headers' => $message->attributes(),
+        ]);
 
-        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+        return $envelope->with(new GpsReceivedStamp($message));
     }
 
     public function keepalive(Envelope $envelope, ?int $seconds = null): void
