@@ -68,7 +68,6 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
                         ->setDefault('createIfNotExist', true)
-                        ->setDefault('update', true)
                         ->setDefault('options', [])
                         ->setDefault(
                             'pull',
@@ -82,7 +81,6 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                         )
                         ->setAllowedTypes('name', 'string')
                         ->setAllowedTypes('createIfNotExist', 'bool')
-                        ->setAllowedTypes('update', 'bool')
                         ->setAllowedTypes('options', 'array')
                         ->setAllowedTypes('pull', 'array')
                         ->setNormalizer('options', $subscriptionOptionsNormalizer)
@@ -100,8 +98,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $resolvedOptions['topic']['createIfNotExist'],
             $resolvedOptions['subscription']['name'],
             $resolvedOptions['subscription']['createIfNotExist'],
-            $resolvedOptions['subscription']['update'],
-            $resolvedOptions['use_messenger_retry'],
+             $resolvedOptions['use_messenger_retry'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],
@@ -170,10 +167,6 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
 
         if (isset($dnsOptions['subscription']['createIfNotExist'])) {
             $dnsOptions['subscription']['createIfNotExist'] = $this->toBool($dnsOptions['subscription']['createIfNotExist'], true);
-        }
-
-        if (isset($dnsOptions['subscription']['update'])) {
-            $dnsOptions['subscription']['update'] = $this->toBool($dnsOptions['subscription']['update'], true);
         }
 
         return array_merge($dnsOptions, $options);

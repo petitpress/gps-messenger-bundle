@@ -21,8 +21,6 @@ interface GpsConfigurationInterface
 
     public function isSubscriptionCreationEnabled(): bool;
 
-    public function isSubscriptionModificationEnabled(): bool;
-
     public function shouldUseMessengerRetry(): bool;
 
     /**

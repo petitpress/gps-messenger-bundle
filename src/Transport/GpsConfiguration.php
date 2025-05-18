@@ -13,7 +13,6 @@ final class GpsConfiguration implements GpsConfigurationInterface
     private bool   $topicCreationEnabled;
     private string $subscriptionName;
     private bool   $subscriptionCreationEnabled;
-    private bool   $subscriptionModificationEnabled;
     private bool   $useMessengerRetry;
 
     /**
@@ -47,7 +46,6 @@ final class GpsConfiguration implements GpsConfigurationInterface
         bool $topicCreationEnabled,
         string $subscriptionName,
         bool $subscriptionCreationEnabled,
-        bool $subscriptionModificationEnabled,
         bool $useMessengerRetry,
         array $clientConfig,
         array $topicOptions,
@@ -58,7 +56,6 @@ final class GpsConfiguration implements GpsConfigurationInterface
         $this->topicCreationEnabled = $topicCreationEnabled;
         $this->subscriptionName = $subscriptionName;
         $this->subscriptionCreationEnabled = $subscriptionCreationEnabled;
-        $this->subscriptionModificationEnabled = $subscriptionModificationEnabled;
         $this->useMessengerRetry = $useMessengerRetry;
         $this->clientConfig = $clientConfig;
         $this->topicOptions = $topicOptions;
@@ -86,10 +83,6 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->subscriptionCreationEnabled;
     }
 
-    public function isSubscriptionModificationEnabled(): bool
-    {
-        return $this->subscriptionModificationEnabled;
-    }
 
     public function shouldUseMessengerRetry(): bool
     {
