@@ -92,7 +92,7 @@ final class GpsTransport implements TransportInterface, KeepaliveReceiverInterfa
             );
         }
 
-        if (true === $this->gpsConfiguration->isSubscriptionModificationEnabled()) {
+        if (false === empty($subscriptionOptions) && true === $this->gpsConfiguration->isSubscriptionModificationEnabled()) {
             $subscription->update($subscriptionOptions);
         }
     }
