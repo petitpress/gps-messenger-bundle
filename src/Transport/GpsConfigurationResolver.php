@@ -98,7 +98,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $resolvedOptions['topic']['createIfNotExist'],
             $resolvedOptions['subscription']['name'],
             $resolvedOptions['subscription']['createIfNotExist'],
-             $resolvedOptions['use_messenger_retry'],
+            $resolvedOptions['use_messenger_retry'],
             $resolvedOptions['client_config'],
             $resolvedOptions['topic']['options'],
             $resolvedOptions['subscription']['options'],

@@ -83,7 +83,6 @@ final class GpsConfiguration implements GpsConfigurationInterface
         return $this->subscriptionCreationEnabled;
     }
 
-
     public function shouldUseMessengerRetry(): bool
     {
         return $this->useMessengerRetry;
