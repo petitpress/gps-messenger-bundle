@@ -84,8 +84,8 @@ final class GpsTransport implements TransportInterface, KeepaliveReceiverInterfa
 
         $subscription = $topic->subscription($this->gpsConfiguration->getSubscriptionName());
 
-        $subscriptionOptions = $this->normalizeSubscriptionOptions();
-        if ((true === $this->gpsConfiguration->isSubscriptionCreationEnabled()) && false === $subscription->exists()) {
+        if (true === $this->gpsConfiguration->isSubscriptionCreationEnabled() && false === $subscription->exists()) {
+            $subscriptionOptions = $this->normalizeSubscriptionOptions();
             $topic->subscribe(
                 $this->gpsConfiguration->getSubscriptionName(),
                 $subscriptionOptions
