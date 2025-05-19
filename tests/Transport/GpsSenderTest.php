@@ -226,7 +226,6 @@ class GpsSenderTest extends TestCase
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
 
-
     public function testItPublishesWithGpsSenderOptionsStamp(): void
     {
         $options = ['foo' => 'bar'];
