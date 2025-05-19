@@ -263,5 +263,4 @@ class GpsSenderTest extends TestCase
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
-
 }
