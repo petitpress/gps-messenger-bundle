@@ -7,6 +7,7 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\AttributesStamp;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsSenderOptionsStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
@@ -65,9 +66,14 @@ final class GpsSender implements SenderInterface
             $messageBuilder = $messageBuilder->setAttributes($attributesStamp->getAttributes());
         }
 
+        $senderOptionsStamp = $envelope->last(GpsSenderOptionsStamp::class);
+        $options = [];
+        if ($senderOptionsStamp instanceof GpsSenderOptionsStamp) {
+            $options = $senderOptionsStamp->getOptions();
+        }
         $this->pubSubClient
             ->topic($this->gpsConfiguration->getTopicName())
-            ->publish($messageBuilder->build())
+            ->publish($messageBuilder->build(), $options)
         ;
 
         return $envelope;
