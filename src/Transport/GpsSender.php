@@ -67,6 +67,7 @@ final class GpsSender implements SenderInterface
         }
 
         $senderOptionsStamp = $envelope->last(GpsSenderOptionsStamp::class);
+        $options = [];
         if ($senderOptionsStamp instanceof GpsSenderOptionsStamp) {
             $options = $senderOptionsStamp->getOptions();
         }
