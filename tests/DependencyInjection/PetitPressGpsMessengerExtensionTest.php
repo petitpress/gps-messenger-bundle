@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DependencyInjection;
+namespace PetitPress\GpsMessengerBundle\Tests\DependencyInjection;
 
 use PetitPress\GpsMessengerBundle\DependencyInjection\PetitPressGpsMessengerExtension;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
@@ -13,25 +13,18 @@ use Symfony\Component\Yaml\Parser;
 
 class PetitPressGpsMessengerExtensionTest extends TestCase
 {
-    private ?ContainerBuilder $configuration;
-
-    protected function tearDown(): void
-    {
-        $this->configuration = null;
-    }
-
     public function testSimpleConfiguration(): void
     {
-        $this->configuration = new ContainerBuilder();
+        $configuration = new ContainerBuilder();
         $loader = new PetitPressGpsMessengerExtension();
         $config = $this->getSimpleConfig();
-        $loader->load([$config], $this->configuration);
+        $loader->load([$config], $configuration);
 
-        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
-        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
+        static::assertTrue($configuration->hasDefinition(GpsTransportFactory::class));
+        $gpsTransportFactoryDefinition = $configuration->getDefinition(GpsTransportFactory::class);
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
-        $this->assertInstanceOf(Reference::class, $cacheArgument);
-        $this->assertEquals('cache.app', (string) $cacheArgument);
+        static::assertInstanceOf(Reference::class, $cacheArgument);
+        static::assertEquals('cache.app', (string) $cacheArgument);
     }
 
     /**
@@ -45,41 +38,41 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
 
     public function testFullConfiguration(): void
     {
-        $this->configuration = new ContainerBuilder();
+        $configuration = new ContainerBuilder();
         $loader = new PetitPressGpsMessengerExtension();
         $config = $this->getFullConfig();
-        $loader->load([$config], $this->configuration);
+        $loader->load([$config], $configuration);
 
-        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
-        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
+        static::assertTrue($configuration->hasDefinition(GpsTransportFactory::class));
+        $gpsTransportFactoryDefinition = $configuration->getDefinition(GpsTransportFactory::class);
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
-        $this->assertInstanceOf(Reference::class, $cacheArgument);
-        $this->assertEquals('foo', (string) $cacheArgument);
+        static::assertInstanceOf(Reference::class, $cacheArgument);
+        static::assertEquals('foo', (string) $cacheArgument);
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    private function getFullConfig()
+    private function getFullConfig(): array
     {
         $yaml = <<<EOF
 auth_cache: 'foo'
 EOF;
-
+        /** @var array<string, mixed> */
         return (new Parser())->parse($yaml);
     }
 
 
     public function testConfigurationWithDisabledAuthCache(): void
     {
-        $this->configuration = new ContainerBuilder();
+        $configuration = new ContainerBuilder();
         $loader = new PetitPressGpsMessengerExtension();
         $config = $this->getDisabledCacheConfig();
-        $loader->load([$config], $this->configuration);
+        $loader->load([$config], $configuration);
 
-        $this->assertTrue($this->configuration->hasDefinition(GpsTransportFactory::class));
-        $gpsTransportFactoryDefinition = $this->configuration->getDefinition(GpsTransportFactory::class);
-        $this->assertNull($gpsTransportFactoryDefinition->getArgument(1));
+        static::assertTrue($configuration->hasDefinition(GpsTransportFactory::class));
+        $gpsTransportFactoryDefinition = $configuration->getDefinition(GpsTransportFactory::class);
+        static::assertNull($gpsTransportFactoryDefinition->getArgument(1));
     }
 
     /**

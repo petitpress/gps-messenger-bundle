@@ -61,22 +61,62 @@ class GpsSenderTest extends TestCase
         );
     }
 
-    public function testItDoesNotPublishIfTheLastStampIsOfTypeRedelivery(): void
+    public function testItDoesNotPublishIfTheLastStampIsOfTypeRedeliveryWithRedeliveryDisabled(): void
     {
         $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
         $envelopeArray = ['body' => []];
 
         $this->serializerMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('encode')
             ->with($envelope)
             ->willReturn($envelopeArray)
         ;
 
         $this->pubSubClientMock
-            ->expects($this->never())
+            ->expects(static::never())
             ->method('topic')
         ;
+
+        $this->gpsConfigurationMock
+            ->method('shouldUseMessengerRetry')
+            ->willReturn(false);
+
+        self::assertSame($envelope, $this->gpsSender->send($envelope));
+    }
+
+    public function testItPublishesIfTheLastStampIsOfTypeRedeliveryWithRedeliveryEnabled(): void
+    {
+        $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
+        $envelopeArray = ['body' => []];
+
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
+
+        $this->gpsConfigurationMock
+            ->method('shouldUseMessengerRetry')
+            ->willReturn(true)
+        ;
+
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
+
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock);
+
+        $this->topicMock
+            ->expects(static::once())
+            ->method('publish');
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
@@ -87,26 +127,26 @@ class GpsSenderTest extends TestCase
         $envelopeArray = ['body' => []];
 
         $this->serializerMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('encode')
             ->with($envelope)
             ->willReturn($envelopeArray)
         ;
 
         $this->gpsConfigurationMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getTopicName')
             ->willReturn(self::TOPIC_NAME)
         ;
 
         $this->topicMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('publish')
             ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => self::ORDERED_KEY]))
         ;
 
         $this->pubSubClientMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('topic')
             ->with(self::TOPIC_NAME)
             ->willReturn($this->topicMock);
@@ -120,26 +160,26 @@ class GpsSenderTest extends TestCase
         $envelopeArray = ['body' => []];
 
         $this->serializerMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('encode')
             ->with($envelope)
             ->willReturn($envelopeArray)
         ;
 
         $this->gpsConfigurationMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getTopicName')
             ->willReturn(self::TOPIC_NAME)
         ;
 
         $this->topicMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('publish')
             ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => null]))
         ;
 
         $this->pubSubClientMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('topic')
             ->with(self::TOPIC_NAME)
             ->willReturn($this->topicMock)
@@ -155,20 +195,20 @@ class GpsSenderTest extends TestCase
         $envelopeArray = ['body' => []];
 
         $this->serializerMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('encode')
             ->with($envelope)
             ->willReturn($envelopeArray)
         ;
 
         $this->gpsConfigurationMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('getTopicName')
             ->willReturn(self::TOPIC_NAME)
         ;
 
         $this->topicMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('publish')
             ->with(new Message([
                 'data' => json_encode($envelopeArray),
@@ -177,7 +217,7 @@ class GpsSenderTest extends TestCase
         ;
 
         $this->pubSubClientMock
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('topic')
             ->with(self::TOPIC_NAME)
             ->willReturn($this->topicMock);

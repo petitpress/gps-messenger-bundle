@@ -12,20 +12,28 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
+ * @implements TransportFactoryInterface<GpsTransport>
  */
 final class GpsTransportFactory implements TransportFactoryInterface
 {
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
     private ?CacheItemPoolInterface $cache;
+    private ?string $forcedTransport;
 
-    public function __construct(GpsConfigurationResolverInterface $gpsConfigurationResolver, ?CacheItemPoolInterface $cache)
-    {
+    public function __construct(
+        GpsConfigurationResolverInterface $gpsConfigurationResolver,
+        ?CacheItemPoolInterface $cache,
+        ?string $forcedTransport
+    ) {
         $this->gpsConfigurationResolver = $gpsConfigurationResolver;
         $this->cache = $cache;
+        $this->forcedTransport = $forcedTransport;
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<mixed> $options
+     *
+     * @return GpsTransport
      */
     public function createTransport(string $dsn, array $options, SerializerInterface $serializer): TransportInterface
     {
@@ -33,7 +41,13 @@ final class GpsTransportFactory implements TransportFactoryInterface
 
         $clientConfig = $options->getClientConfig();
         if ($this->cache instanceof CacheItemPoolInterface) {
-            $clientConfig['authCache'] ??= $this->cache;
+            if (! isset($clientConfig['credentialsConfig']) || ! is_array($clientConfig['credentialsConfig'])) {
+                $clientConfig['credentialsConfig'] = [];
+            }
+            $clientConfig['credentialsConfig']['authCache'] ??= $this->cache;
+        }
+        if (isset($this->forcedTransport)) {
+            $clientConfig['transport'] = $this->forcedTransport;
         }
 
         return new GpsTransport(
@@ -44,7 +58,7 @@ final class GpsTransportFactory implements TransportFactoryInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param array<mixed> $options
      */
     public function supports(string $dsn, array $options): bool
     {

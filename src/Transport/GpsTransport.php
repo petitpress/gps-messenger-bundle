@@ -6,6 +6,8 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 
 use Google\Cloud\PubSub\PubSubClient;
 use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
+use Symfony\Component\Messenger\Transport\Sender\SenderInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Symfony\Component\Messenger\Transport\SetupableTransportInterface;
 use Symfony\Component\Messenger\Transport\TransportInterface;
@@ -13,22 +15,16 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsTransport implements TransportInterface, SetupableTransportInterface
+final class GpsTransport implements TransportInterface, KeepaliveReceiverInterface, SetupableTransportInterface
 {
-    private PubSubClient $pubSubClient;
-    private GpsConfigurationInterface $gpsConfiguration;
-    private SerializerInterface $serializer;
-    private GpsReceiver $receiver;
-    private GpsSender $sender;
+    private KeepaliveReceiverInterface $receiver;
+    private SenderInterface $sender;
 
     public function __construct(
-        PubSubClient $pubSubClient,
-        GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        private PubSubClient $pubSubClient,
+        private GpsConfigurationInterface $gpsConfiguration,
+        private SerializerInterface $serializer
     ) {
-        $this->pubSubClient = $pubSubClient;
-        $this->gpsConfiguration = $gpsConfiguration;
-        $this->serializer = $serializer;
     }
 
     /**
@@ -63,35 +59,23 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
         return $this->getSender()->send($envelope);
     }
 
-    public function getReceiver(): GpsReceiver
+    public function getReceiver(): KeepaliveReceiverInterface
     {
         /** @psalm-suppress RedundantPropertyInitializationCheck */
-        if (isset($this->receiver)) {
-            return $this->receiver;
-        }
-
-        $this->receiver = new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
-
-        return $this->receiver;
+        return $this->receiver ??= new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
     }
 
-    public function getSender(): GpsSender
+    public function getSender(): SenderInterface
     {
         /** @psalm-suppress RedundantPropertyInitializationCheck */
-        if (isset($this->sender)) {
-            return $this->sender;
-        }
-
-        $this->sender = new GpsSender($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
-
-        return $this->sender;
+        return $this->sender ??= new GpsSender($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
     }
 
     public function setup(): void
     {
         $topic = $this->pubSubClient->topic($this->gpsConfiguration->getTopicName());
 
-        if (false === $topic->exists()) {
+        if (true === $this->gpsConfiguration->isTopicCreationEnabled() && false === $topic->exists()) {
             $topic = $this->pubSubClient->createTopic(
                 $this->gpsConfiguration->getTopicName(),
                 $this->gpsConfiguration->getTopicOptions()
@@ -100,11 +84,16 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
 
         $subscription = $topic->subscription($this->gpsConfiguration->getSubscriptionName());
 
-        if (false === $subscription->exists()) {
+        if (true === $this->gpsConfiguration->isSubscriptionCreationEnabled() && false === $subscription->exists()) {
             $topic->subscribe(
                 $this->gpsConfiguration->getSubscriptionName(),
                 $this->gpsConfiguration->getSubscriptionOptions()
             );
         }
+    }
+
+    public function keepalive(Envelope $envelope, ?int $seconds = null): void
+    {
+        $this->getReceiver()->keepalive($envelope, $seconds);
     }
 }

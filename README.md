@@ -6,8 +6,23 @@ This bundle provides a simple implementation of Google Pub/Sub transport for Sym
 The bundle requires only `symfony/messenger`, `google/cloud-pubsub` and `symfony/options-resolver` packages. 
 In contrast with [Enqueue GPS transport](https://github.com/php-enqueue/gps),
 it doesn't require [Enqueue](https://github.com/php-enqueue) 
-and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme). 
-It supports ordering messages with `OrderingKeyStamp` and it's not outdated. 
+and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme).
+
+## Features
+
+- **Compatible with the latest `google/cloud-pubsub` 2.***.
+- **Zero extra dependencies** beyond core Symfony (e.g. `Symfony Messenger`) and Pub/Sub libraries.
+- **Flexible and extensive configuration**, available via options or DSN (Data Source Name), including `deadLetterPolicy`, `enableMessageOrdering`, `ackDeadlineSeconds`).
+- **Automatic Pub/Sub Topic and Subscription creation**, with the ability to disable it if needed.
+- **Message ordering support** using the `OrderingKeyStamp`.
+- **Keep-alive support** for long-running Messenger workers.
+
+## Support
+
+| Version                                                               | Status             | Symfony Versions |
+|-----------------------------------------------------------------------|--------------------|------------------|
+| [3.x](https://github.com/petitpress/gps-messenger-bundle/tree/3.x)    | Actively Supported | >= 5.4           |
+| [4.x](https://github.com/petitpress/gps-messenger-bundle/tree/master) | In development     | >= 7.2           |
 
 ## Installation
 
@@ -32,7 +47,7 @@ as Google needs to access some variables through `getenv`. To do so, use putenv 
 
 List of Google Pub/Sub configurable variables :
 ```dotenv
-# use these for production environemnt:
+# use these for production environment:
 GOOGLE_APPLICATION_CREDENTIALS='google-pubsub-credentials.json'
 GCLOUD_PROJECT='project-id'
 
@@ -40,7 +55,22 @@ GCLOUD_PROJECT='project-id'
 PUBSUB_EMULATOR_HOST=http://localhost:8538
 ```
 
+or if you have credentials in a base64 encoded env variable:
+```yaml
+# config/packages/messenger.yaml
+
+framework:
+    messenger:
+        transports:
+            gps_transport:
+                dsn: 'gps://default'
+                options:
+                    client_config:
+                        credentials: '%env(json:base64:GOOGLE_PUBSUB_KEY)%'
+```
+
 ### Step 3: Configure Symfony Messenger
+
 ```yaml
 # config/packages/messenger.yaml
 
@@ -52,20 +82,22 @@ framework:
                 options:
                     client_config: # optional (default: [])
                         apiEndpoint: 'https://europe-west3-pubsub.googleapis.com'
-                    max_messages_pull: 10 # optional (default: 10)
                     topic: # optional (default name: messages)
                         name: 'messages'
-                        options: # optional create options if not exists (default: []), for all options take at look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/topic?method=create
+                        options: # optional create options if not exists (default: []), for all options take at look at https://cloud.google.com/php/docs/reference/cloud-pubsub/latest/Topic#_Google_Cloud_PubSub_Topic__create__
                             labels:
                                 - label1
                                 - label2
                     subscription: # optional (default the same as topic.name)
                         name: 'messages'
-                        options: # optional create options if not exists (default: []), fol all options take a look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/subscription?method=create
+                        options: # optional create options if not exists (default: []), for all options take a look at https://cloud.google.com/php/docs/reference/cloud-pubsub/latest/Subscription#_Google_Cloud_PubSub_Subscription__create__
                             enableExactlyOnceDelivery: true
                             labels:
                                 - label1
                                 - label2
+                        pull:
+                            maxMessages: 10 # optional (default: 10)
+
 ```
 or:
 ```yaml
@@ -75,7 +107,7 @@ framework:
     messenger:
         transports:
             gps_transport:
-                dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&max_messages_pull=10'
+                dsn: 'gps://default/messages?client_config[apiEndpoint]=https://europe-west3-pubsub.googleapis.com&subscription[pull][maxMessages]=10'
 ```
 to use emulator in local:
 ```yaml
@@ -113,6 +145,11 @@ petit_press_gps_messenger:
   Can be very useful when used together with [subscription filters](https://cloud.google.com/pubsub/docs/subscription-message-filter).
 
 ### Step 6: Create topics from config
+
 ```bash
 bin/console messenger:setup-transports
 ```
+
+## License
+
+This bundle is released under the [MIT License](LICENSE).

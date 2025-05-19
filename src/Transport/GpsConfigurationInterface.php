@@ -15,22 +15,35 @@ interface GpsConfigurationInterface
 {
     public function getTopicName(): string;
 
+    public function isTopicCreationEnabled(): bool;
+
     public function getSubscriptionName(): string;
 
-    public function getMaxMessagesPull(): int;
+    public function isSubscriptionCreationEnabled(): bool;
+
+    public function shouldUseMessengerRetry(): bool;
 
     /**
      * @see PubSubClient constructor options
+     * @return array<string, mixed>
      */
     public function getClientConfig(): array;
 
     /**
      * @see Topic::create options
+     * @return array<string, mixed>
      */
     public function getTopicOptions(): array;
 
     /**
      * @see Subscription::create options
+     * @return array<string, mixed>
      */
     public function getSubscriptionOptions(): array;
+
+    /**
+     * @see Subscription::pull options
+     * @return array<string, mixed>
+     */
+    public function getSubscriptionPullOptions(): array;
 }

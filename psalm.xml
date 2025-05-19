@@ -5,14 +5,19 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    findUnusedCode="false"
+    findUnusedBaselineEntry="false"
 >
     <projectFiles>
-        <directory name="Tests" />
-        <directory name="Transport" />
-        <file name="GpsMessengerBundle.php" />
+        <directory name="src" />
+        <directory name="tests" />
         <ignoreFiles>
             <directory name="vendor" />
-            <file name="GpsMessengerBundle.php" />
+            <directory name="src/DependencyInjection" />
+            <directory name="src/Resources" />
         </ignoreFiles>
     </projectFiles>
+    <issueHandlers>
+        <MissingOverrideAttribute errorLevel="suppress"/>
+    </issueHandlers>
 </psalm>
