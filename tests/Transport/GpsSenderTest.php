@@ -10,6 +10,7 @@ use Google\Cloud\PubSub\Topic;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsSender;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\AttributesStamp;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsSenderOptionsStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -224,4 +225,43 @@ class GpsSenderTest extends TestCase
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
     }
+
+
+    public function testItPublishesWithGpsSenderOptionsStamp(): void
+    {
+        $options = ['foo' => 'bar'];
+        $envelope = EnvelopeFactory::create(new GpsSenderOptionsStamp($options));
+        $envelopeArray = ['body' => []];
+
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
+
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
+
+        $this->topicMock
+            ->expects(static::once())
+            ->method('publish')
+            ->with(new Message([
+                'data' => json_encode($envelopeArray),
+                'attributes' => [],
+            ]), $options)
+        ;
+
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock);
+
+        self::assertSame($envelope, $this->gpsSender->send($envelope));
+    }
+
 }
