@@ -144,6 +144,8 @@ petit_press_gps_messenger:
   For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using-attributes). 
   Can be very useful when used together with [subscription filters](https://cloud.google.com/pubsub/docs/subscription-message-filter).
 
+* `GpsSenderOptionsStamp`: use to specify options for the second parameter of the `publish` method in the Pub/Sub client.
+
 ### Step 6: Create topics from config
 
 ```bash
