@@ -52,8 +52,8 @@ jobs:
 
       - name: Display code coverage %
         run: |
-          COVERAGE=$(xmllint --xpath "string(//coverage/@line-rate)" coverage.xml)
-          COVERAGE_PERCENT=$(awk "BEGIN {printf \"%.2f\", $COVERAGE * 100}")
+          LINE_RATE=$(grep -oP 'line-rate="\K[0-9.]+' coverage.xml | head -1)
+          COVERAGE_PERCENT=$(awk "BEGIN {printf \"%.2f\", $LINE_RATE * 100}")
           echo "Code coverage is ${COVERAGE_PERCENT}%"
 
       - name: Run style tests
