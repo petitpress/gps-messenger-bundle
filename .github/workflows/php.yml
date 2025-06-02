@@ -48,21 +48,14 @@ jobs:
           dependency-versions: ${{ matrix.dependencies }}
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --coverage-text > coverage.txt
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
 
-      - name: Post PR comment if coverage < 95%
-        if: ${{ steps.coverage.outputs.coverage != '' }}
-        run: |
-          COVERAGE=${{ steps.coverage.outputs.coverage }}
-          echo "Current coverage is $COVERAGE%"
-          if (( $(echo "$COVERAGE < 95" | bc -l) )); then
-          COMMENT="⚠️ Code coverage dropped below 95%: **$COVERAGE%**"
-          else
-          COMMENT="✅ Code coverage is healthy: **$COVERAGE%**"
-          fi
-          
-          gh pr comment ${{ github.event.pull_request.number }} \
-          --body "$COMMENT"
+      - name: Check test coverage
+        id: test-coverage
+        uses: johanvanhelden/gha-clover-test-coverage-check@v1
+        with:
+          percentage: "95"
+          filename: "coverage.xml"
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv
