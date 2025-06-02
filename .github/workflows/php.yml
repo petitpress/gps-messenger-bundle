@@ -50,11 +50,18 @@ jobs:
       - name: Run unit tests
         run: vendor/bin/phpunit --coverage-clover coverage.xml
 
-      - name: Display code coverage %
-        run: |
-          LINE_RATE=$(grep -oP 'line-rate="\K[0-9.]+' coverage.xml | head -1)
-          COVERAGE_PERCENT=$(awk "BEGIN {printf \"%.2f\", $LINE_RATE * 100}")
-          echo "Code coverage is ${COVERAGE_PERCENT}%"
+      - name: PHPUnit Coverage Comment
+        if: github.event_name == 'pull_request'
+        uses: php-actions/phpunit-coverage-comment@v1.x 
+        with:
+          clover_file: coverage.xml
+          # Optional: Configure thresholds for comment styling (success, warning, error)
+          min_coverage_overall: '70'
+          min_coverage_changed_files: '80' # Coverage for files changed in the PR
+          # token: ${{ secrets.GITHUB_TOKEN }} # Usually not needed explicitly as it's default
+          # title: 'My Custom Coverage Report' # Optional: custom title for the comment
+          # hide_branch_coverage: 'false' # Optional
+          # hide_complexity: 'false' # Optional
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv
