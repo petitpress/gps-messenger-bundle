@@ -48,20 +48,21 @@ jobs:
           dependency-versions: ${{ matrix.dependencies }}
 
       - name: Run unit tests
-        run: vendor/bin/phpunit --coverage-clover coverage.xml
+        run: vendor/bin/phpunit --coverage-text > coverage.txt
 
-      - name: PHPUnit Coverage Comment
-        if: github.event_name == 'pull_request'
-        uses: php-actions/phpunit-coverage-comment@v1.x 
-        with:
-          clover_file: coverage.xml
-          # Optional: Configure thresholds for comment styling (success, warning, error)
-          min_coverage_overall: '70'
-          min_coverage_changed_files: '80' # Coverage for files changed in the PR
-          # token: ${{ secrets.GITHUB_TOKEN }} # Usually not needed explicitly as it's default
-          # title: 'My Custom Coverage Report' # Optional: custom title for the comment
-          # hide_branch_coverage: 'false' # Optional
-          # hide_complexity: 'false' # Optional
+      - name: Post PR comment if coverage < 70%
+        if: ${{ steps.coverage.outputs.coverage != '' }}
+        run: |
+          COVERAGE=${{ steps.coverage.outputs.coverage }}
+          echo "Current coverage is $COVERAGE%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+          COMMENT="⚠️ Code coverage dropped below 70%: **$COVERAGE%**"
+          else
+          COMMENT="✅ Code coverage is healthy: **$COVERAGE%**"
+          fi
+          
+          gh pr comment ${{ github.event.pull_request.number }} \
+          --body "$COMMENT"
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv
