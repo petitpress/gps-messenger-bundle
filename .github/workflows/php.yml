@@ -50,10 +50,11 @@ jobs:
       - name: Run unit tests
         run: vendor/bin/phpunit --coverage-clover coverage.xml
 
-      - name: Send coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: coverage.xml
+      - name: Display code coverage %
+        run: |
+          COVERAGE=$(xmllint --xpath "string(//coverage/@line-rate)" coverage.xml)
+          COVERAGE_PERCENT=$(awk "BEGIN {printf \"%.2f\", $COVERAGE * 100}")
+          echo "Code coverage is ${COVERAGE_PERCENT}%"
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv
