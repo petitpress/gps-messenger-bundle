@@ -14,6 +14,7 @@ use PetitPress\GpsMessengerBundle\Transport\GpsReceiver;
 use PetitPress\GpsMessengerBundle\Transport\GpsSender;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransport;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -128,7 +129,11 @@ class GpsTransportTest extends TestCase
         $this->subject->keepalive(new Envelope(new stdClass()));
     }
 
-    public function testSetup(): void
+    /**
+     * @param array<string, mixed> $subscriptionOptions
+     */
+    #[DataProvider('dataProvider')]
+    public function testSetup(array $subscriptionOptions): void
     {
         $subscription = 'test';
 
@@ -136,6 +141,11 @@ class GpsTransportTest extends TestCase
             ->expects(static::atLeast(2))
             ->method('getTopicName')
             ->willReturn($subscription);
+
+        $this->gpsConfiguration
+            ->expects(static::once())
+            ->method('getSubscriptionOptions')
+            ->willReturn($subscriptionOptions);
 
         $this->gpsConfiguration
             ->expects(static::atLeast(2))
@@ -173,6 +183,81 @@ class GpsTransportTest extends TestCase
             ->expects(static::once())
             ->method('topic')
             ->willReturn($topicMock);
+
+        $this->pubSubClient
+            ->expects(static::once())
+            ->method('createTopic')
+            ->willReturn($topicMock);
+
+        $this->subject->setup();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function dataProvider(): array
+    {
+        return [
+            'Empty' => [
+                'subscriptionOptions' => []
+            ],
+            'DeadLetterTopic FQN' => [
+                'subscriptionOptions' => ['deadLetterPolicy' => ['deadLetterTopic' => 'projects/foo/topics/qux', 'maxDeliveryAttempts' => 3]]
+            ],
+        ];
+    }
+
+    public function testSetupDeadLetterPolicy(): void
+    {
+        $subscription = 'test';
+
+        $this->gpsConfiguration
+            ->expects(static::atLeast(2))
+            ->method('getTopicName')
+            ->willReturn($subscription);
+
+        $this->gpsConfiguration
+            ->expects(static::atLeast(2))
+            ->method('getSubscriptionName')
+            ->willReturn($subscription);
+
+        $this->gpsConfiguration
+            ->expects(static::atLeast(1))
+            ->method('isTopicCreationEnabled')
+            ->willReturn(true);
+
+        $this->gpsConfiguration
+            ->expects(static::atLeast(1))
+            ->method('isSubscriptionCreationEnabled')
+            ->willReturn(true);
+
+        $this->gpsConfiguration
+            ->expects(static::once())
+            ->method('getSubscriptionOptions')
+            ->willReturn(['deadLetterPolicy' => ['deadLetterTopic' => 'qux', 'maxDeliveryAttempts' => 3]]);
+
+        $topicMock = $this->createMock(Topic::class);
+        $topicMock
+            ->expects(static::once())
+            ->method('exists')
+            ->willReturn(false);
+
+        $subscriptionMock = $this->createMock(Subscription::class);
+        $subscriptionMock
+            ->expects(static::once())
+            ->method('exists')
+            ->willReturn(false);
+
+        $topicMock
+            ->expects(static::once())
+            ->method('subscription')
+            ->willReturn($subscriptionMock);
+
+        $deadLetterTopicMock = $this->createMock(Topic::class);
+        $this->pubSubClient
+            ->expects(static::exactly(2))
+            ->method('topic')
+            ->willReturnOnConsecutiveCalls($topicMock, $deadLetterTopicMock);
 
         $this->pubSubClient
             ->expects(static::once())
