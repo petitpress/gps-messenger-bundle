@@ -10,6 +10,7 @@
       <directory suffix=".php">.</directory>
     </include>
     <exclude>
+        <file>./ecs.php</file>
       <directory>./vendor</directory>
       <directory>./tests</directory>
     </exclude>
