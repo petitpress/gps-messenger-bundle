@@ -1,5 +1,7 @@
 .idea
 .phpunit.result.cache
+.phpunit.cache
+phpunit.xml
 /vendor/
 composer.lock
 .php-cs-fixer.cache
