@@ -22,15 +22,18 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
     private SerializerInterface $serializer;
     private ReceiverInterface $receiver;
     private SenderInterface $sender;
+    private EncodingStrategy $encodingStrategy;
 
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        EncodingStrategy $encodingStrategy,
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->encodingStrategy = $encodingStrategy;
     }
 
     /**
@@ -72,7 +75,7 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
             return $this->receiver;
         }
 
-        $this->receiver = new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
+        $this->receiver = new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer, $this->encodingStrategy);
 
         return $this->receiver;
     }
@@ -84,7 +87,7 @@ final class GpsTransport implements TransportInterface, SetupableTransportInterf
             return $this->sender;
         }
 
-        $this->sender = new GpsSender($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
+        $this->sender = new GpsSender($this->pubSubClient, $this->gpsConfiguration, $this->serializer, $this->encodingStrategy);
 
         return $this->sender;
     }

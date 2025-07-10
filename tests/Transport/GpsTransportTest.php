@@ -9,6 +9,7 @@ use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Subscription;
 use Google\Cloud\PubSub\Topic;
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsReceiver;
 use PetitPress\GpsMessengerBundle\Transport\GpsSender;
@@ -25,7 +26,7 @@ class GpsTransportTest extends TestCase
 {
     /**
      */
-    private GpsTransport $subject;
+    private GpsTransport $gpsTransport;
 
     /**
      * @var PubSubClient&MockObject
@@ -48,16 +49,17 @@ class GpsTransportTest extends TestCase
         $this->gpsConfiguration = $this->createMock(GpsConfigurationInterface::class);
         $this->serializerMock = $this->createMock(SerializerInterface::class);
 
-        $this->subject = new GpsTransport(
+        $this->gpsTransport = new GpsTransport(
             $this->pubSubClient,
             $this->gpsConfiguration,
-            $this->serializerMock
+            $this->serializerMock,
+            EncodingStrategy::Wrapped,
         );
     }
 
     public function testGet(): void
     {
-        static::assertInstanceOf(Generator::class, $this->subject->get());
+        static::assertInstanceOf(Generator::class, $this->gpsTransport->get());
     }
 
     public function testAck(): void
@@ -65,7 +67,7 @@ class GpsTransportTest extends TestCase
         $this->expectException(TransportException::class);
         $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
 
-        $this->subject->ack(new Envelope(new stdClass()));
+        $this->gpsTransport->ack(new Envelope(new stdClass()));
     }
 
     public function testReject(): void
@@ -73,7 +75,7 @@ class GpsTransportTest extends TestCase
         $this->expectException(TransportException::class);
         $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
 
-        $this->subject->reject(new Envelope(new stdClass()));
+        $this->gpsTransport->reject(new Envelope(new stdClass()));
     }
 
     public function testSend(): void
@@ -115,7 +117,7 @@ class GpsTransportTest extends TestCase
             ->method('topic')
             ->willReturn($topicMock);
 
-        $finalEnvelop = $this->subject->send($envelope);
+        $finalEnvelop = $this->gpsTransport->send($envelope);
 
         static::assertSame($message, $finalEnvelop->getMessage());
     }
@@ -171,16 +173,16 @@ class GpsTransportTest extends TestCase
             ->method('createTopic')
             ->willReturn($topicMock);
 
-        $this->subject->setup();
+        $this->gpsTransport->setup();
     }
 
     public function testGetReceiver(): void
     {
-        static::assertInstanceOf(GpsReceiver::class, $this->subject->getReceiver());
+        static::assertInstanceOf(GpsReceiver::class, $this->gpsTransport->getReceiver());
     }
 
     public function testGetSender(): void
     {
-        static::assertInstanceOf(GpsSender::class, $this->subject->getSender());
+        static::assertInstanceOf(GpsSender::class, $this->gpsTransport->getSender());
     }
 }

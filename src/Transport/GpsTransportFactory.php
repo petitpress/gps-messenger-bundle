@@ -19,15 +19,18 @@ final class GpsTransportFactory implements TransportFactoryInterface
     private GpsConfigurationResolverInterface $gpsConfigurationResolver;
     private ?CacheItemPoolInterface $cache;
     private ?string $forcedTransport;
+    private EncodingStrategy $encodingStrategy;
 
     public function __construct(
         GpsConfigurationResolverInterface $gpsConfigurationResolver,
         ?CacheItemPoolInterface $cache,
-        ?string $forcedTransport
+        ?string $forcedTransport,
+        EncodingStrategy $encodingStrategy,
     ) {
         $this->gpsConfigurationResolver = $gpsConfigurationResolver;
         $this->cache = $cache;
         $this->forcedTransport = $forcedTransport;
+        $this->encodingStrategy = $encodingStrategy;
     }
 
     /**
@@ -53,7 +56,8 @@ final class GpsTransportFactory implements TransportFactoryInterface
         return new GpsTransport(
             new PubSubClient($clientConfig),
             $options,
-            $serializer
+            $serializer,
+            $this->encodingStrategy
         );
     }
 

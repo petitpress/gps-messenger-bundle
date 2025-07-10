@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Tests\Transport;
 
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransport;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 class GpsTransportFactoryTest extends TestCase
 {
-    /**
-     * @dataProvider dsnProvider
-     */
+    #[DataProvider('dsnProvider')]
     public function testSupports(bool $expected, string $dsn): void
     {
         $factory = new GpsTransportFactory(
             $this->createMock(GpsConfigurationResolverInterface::class),
             $this->createMock(CacheItemPoolInterface::class),
-            null
+            null,
+            EncodingStrategy::Wrapped,
         );
 
         static::assertSame($expected, $factory->supports($dsn, []));
@@ -33,7 +34,8 @@ class GpsTransportFactoryTest extends TestCase
         $factory = new GpsTransportFactory(
             new GpsConfigurationResolver(),
             $this->createMock(CacheItemPoolInterface::class),
-            null
+            null,
+            EncodingStrategy::Wrapped,
         );
 
         $transport = $factory->createTransport(

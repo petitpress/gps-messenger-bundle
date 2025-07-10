@@ -8,6 +8,7 @@ use PetitPress\GpsMessengerBundle\Transport\GpsConfiguration;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -23,9 +24,9 @@ final class GpsConfigurationTest extends TestCase
     }
 
     /**
-     * @dataProvider dataProvider
      * @param array<string, mixed>                     $options
      */
+    #[DataProvider('dataProvider')]
     public function testResolve(string $dsn, array $options, GpsConfigurationInterface $expectedConfiguration): void
     {
         $configuration = $this->gpsConfigurationResolver->resolve($dsn, $options);
