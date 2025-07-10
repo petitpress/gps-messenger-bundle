@@ -9,15 +9,14 @@ use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransport;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
 class GpsTransportFactoryTest extends TestCase
 {
-    /**
-     * @dataProvider dsnProvider
-     */
+    #[DataProvider('dsnProvider')]
     public function testSupports(bool $expected, string $dsn): void
     {
         $factory = new GpsTransportFactory(
