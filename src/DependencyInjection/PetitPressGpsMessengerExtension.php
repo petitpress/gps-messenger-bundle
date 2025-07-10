@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\DependencyInjection;
 
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -30,6 +31,9 @@ final class PetitPressGpsMessengerExtension extends Extension
         }
         if (isset($config['forced_transport'])) {
             $gpsTransportFactoryDefinition->replaceArgument(2, $config['forced_transport']);
+        }
+        if ($config['encoding_strategy']) {
+            $gpsTransportFactoryDefinition->replaceArgument(3, EncodingStrategy::from($config['encoding_strategy']));
         }
     }
 }

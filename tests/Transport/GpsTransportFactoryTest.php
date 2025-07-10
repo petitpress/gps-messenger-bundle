@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PetitPress\GpsMessengerBundle\Tests\Transport;
 
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransport;
@@ -22,7 +23,8 @@ class GpsTransportFactoryTest extends TestCase
         $factory = new GpsTransportFactory(
             $this->createMock(GpsConfigurationResolverInterface::class),
             $this->createMock(CacheItemPoolInterface::class),
-            null
+            null,
+            EncodingStrategy::Wrapped,
         );
 
         static::assertSame($expected, $factory->supports($dsn, []));
@@ -33,7 +35,8 @@ class GpsTransportFactoryTest extends TestCase
         $factory = new GpsTransportFactory(
             new GpsConfigurationResolver(),
             $this->createMock(CacheItemPoolInterface::class),
-            null
+            null,
+            EncodingStrategy::Wrapped,
         );
 
         $transport = $factory->createTransport(

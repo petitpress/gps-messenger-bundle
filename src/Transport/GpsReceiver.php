@@ -24,15 +24,18 @@ final class GpsReceiver implements ReceiverInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+    private EncodingStrategy $encodingStrategy;
 
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        EncodingStrategy $encodingStrategy,
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->encodingStrategy = $encodingStrategy;
     }
 
     /**
@@ -110,6 +113,31 @@ final class GpsReceiver implements ReceiverInterface
      */
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
+        if (EncodingStrategy::Hybrid === $this->encodingStrategy && str_starts_with($message->data(), '{"body":"{')) {
+            $rawData = $this->decodeWrappedMessage($message);
+
+            return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+        }
+
+        if (EncodingStrategy::Flat === $this->encodingStrategy) {
+            $envelope = $this->serializer->decode([
+                'body' => $message->data(),
+                'headers' => $message->attributes(),
+            ]);
+
+            return $envelope->with(new GpsReceivedStamp($message));
+        }
+
+        $rawData = $this->decodeWrappedMessage($message);
+
+        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+    }
+
+    /**
+     * @return mixed[]
+     */
+    private function decodeWrappedMessage(Message $message): array
+    {
         try {
             /** @var array<string, mixed> $rawData */
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
@@ -117,6 +145,6 @@ final class GpsReceiver implements ReceiverInterface
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
-        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+        return $rawData;
     }
 }

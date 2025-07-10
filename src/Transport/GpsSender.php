@@ -22,15 +22,18 @@ final class GpsSender implements SenderInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+    private EncodingStrategy $encodingStrategy;
 
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        EncodingStrategy $encodingStrategy,
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->encodingStrategy = $encodingStrategy;
     }
 
     /**
@@ -38,14 +41,11 @@ final class GpsSender implements SenderInterface
      */
     public function send(Envelope $envelope): Envelope
     {
+        /** @var array{body: string, headers: null|array<string, string>} $encodedMessage */
         $encodedMessage = $this->serializer->encode($envelope);
 
         $messageBuilder = new MessageBuilder();
-        try {
-            $messageBuilder = $messageBuilder->setData(json_encode($encodedMessage, JSON_THROW_ON_ERROR));
-        } catch (\JsonException $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
-        }
+        $messageBuilder = $this->setMessage($messageBuilder, $encodedMessage);
 
         $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
         if ($redeliveryStamp instanceof RedeliveryStamp) {
@@ -69,5 +69,23 @@ final class GpsSender implements SenderInterface
         ;
 
         return $envelope;
+    }
+
+    /**
+     * @param array{body: string, headers: null|array<string, string>} $encodedMessage
+     */
+    private function setMessage(MessageBuilder $messageBuilder, array $encodedMessage): MessageBuilder
+    {
+        if (EncodingStrategy::Flat === $this->encodingStrategy || EncodingStrategy::Hybrid === $this->encodingStrategy) {
+            return $messageBuilder
+                ->setData($encodedMessage['body'])
+                ->setAttributes($encodedMessage['headers'] ?? []);
+        }
+
+        try {
+            return $messageBuilder->setData(json_encode($encodedMessage, JSON_THROW_ON_ERROR));
+        } catch (\JsonException $exception) {
+            throw new TransportException($exception->getMessage(), 0, $exception);
+        }
     }
 }

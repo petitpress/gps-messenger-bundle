@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolver;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationResolverInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
@@ -14,7 +15,8 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->args([
             new ReferenceConfigurator(GpsConfigurationResolverInterface::class),
             null,
-            null
+            null,
+            EncodingStrategy::Wrapped,
         ])
         ->tag('messenger.transport_factory')
 

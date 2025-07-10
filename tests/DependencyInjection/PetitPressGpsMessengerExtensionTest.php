@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PetitPress\GpsMessengerBundle\Tests\DependencyInjection;
 
 use PetitPress\GpsMessengerBundle\DependencyInjection\PetitPressGpsMessengerExtension;
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -48,6 +49,7 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
         static::assertInstanceOf(Reference::class, $cacheArgument);
         static::assertEquals('foo', (string) $cacheArgument);
+        static::assertEquals(EncodingStrategy::Flat, $gpsTransportFactoryDefinition->getArgument(3));
     }
 
     /**
@@ -57,6 +59,7 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
     {
         $yaml = <<<EOF
 auth_cache: 'foo'
+encoding_strategy: 'flat'
 EOF;
         /** @var array<string, mixed> */
         return (new Parser())->parse($yaml);
