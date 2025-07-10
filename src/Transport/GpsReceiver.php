@@ -113,13 +113,13 @@ final class GpsReceiver implements ReceiverInterface
      */
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
-        if (EncodingStrategy::Hybrid === $this->encodingStrategy && str_starts_with($message->data(), '{"body":"{')) {
+        if (EncodingStrategy::Hybrid === $this->encodingStrategy && str_starts_with($message->data(), '{"body":"')) {
             $rawData = $this->decodeWrappedMessage($message);
 
             return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
         }
 
-        if (EncodingStrategy::Flat === $this->encodingStrategy) {
+        if (EncodingStrategy::Hybrid === $this->encodingStrategy || EncodingStrategy::Flat === $this->encodingStrategy) {
             $envelope = $this->serializer->decode([
                 'body' => $message->data(),
                 'headers' => $message->attributes(),
