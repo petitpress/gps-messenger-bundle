@@ -12,25 +12,22 @@ use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
-use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
+use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Throwable;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsReceiver implements ReceiverInterface
+final class GpsReceiver implements KeepaliveReceiverInterface
 {
-    private PubSubClient $pubSubClient;
-    private GpsConfigurationInterface $gpsConfiguration;
-    private SerializerInterface $serializer;
-
+    public const DEFAULT_KEEPALIVE_SECONDS = 5;
     private array $subcriptionInfo;
 
     public function __construct(
-        PubSubClient              $pubSubClient,
-        GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface       $serializer
+        private PubSubClient              $pubSubClient,
+        private GpsConfigurationInterface $gpsConfiguration,
+        private SerializerInterface       $serializer
     )
     {
         $this->pubSubClient = $pubSubClient;
