@@ -30,9 +30,6 @@ final class GpsReceiver implements KeepaliveReceiverInterface
         private SerializerInterface       $serializer
     )
     {
-        $this->pubSubClient = $pubSubClient;
-        $this->gpsConfiguration = $gpsConfiguration;
-        $this->serializer = $serializer;
     }
 
     /**
@@ -53,30 +50,6 @@ final class GpsReceiver implements KeepaliveReceiverInterface
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
-    }
-
-    /**
-     * Creates Symfony Envelope from Google Pub/Sub Message.
-     * It adds stamp with received native Google Pub/Sub message.
-     */
-    private function createEnvelopeFromPubSubMessage(Message $message): Envelope
-    {
-        try {
-            $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
-        }
-
-        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message, $this->getInfo()));
-    }
-
-    private function getInfo(): array
-    {
-        if (!$this->subcriptionInfo) {
-            $this->subcriptionInfo = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName())->info() ?? [];
-        }
-
-        return $this->subcriptionInfo;
     }
 
     /**
@@ -118,11 +91,55 @@ final class GpsReceiver implements KeepaliveReceiverInterface
         try {
             $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
 
-            $this->pubSubClient
-                ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
+            $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
+
+            if ($this->gpsConfiguration->shouldUseMessengerRetry()) {
+                $subscription->acknowledge($gpsReceivedStamp->getGpsMessage());
+            } else {
+                $subscription->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
+            }
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
+    }
+
+    
+    /**
+     * Creates Symfony Envelope from Google Pub/Sub Message.
+     * It adds stamp with received native Google Pub/Sub message.
+     */
+    private function createEnvelopeFromPubSubMessage(Message $message): Envelope
+    {
+        try {
+            $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
+        }
+
+        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message, $this->getInfo()));
+    }
+
+    public function keepalive(Envelope $envelope, ?int $seconds = null): void
+    {
+        try {
+            $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
+
+            $this->pubSubClient
+                ->subscription($this->gpsConfiguration->getSubscriptionName())
+                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), $seconds ?? self::DEFAULT_KEEPALIVE_SECONDS)
+            ;
+        } catch (Throwable $exception) {
+            throw new TransportException($exception->getMessage(), 0, $exception);
+        }
+    }
+    
+
+    private function getInfo(): array
+    {
+        if (!$this->subcriptionInfo) {
+            $this->subcriptionInfo = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName())->info() ?? [];
+        }
+
+        return $this->subcriptionInfo;
     }
 }
