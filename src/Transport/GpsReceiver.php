@@ -115,7 +115,7 @@ final class GpsReceiver implements KeepaliveReceiverInterface
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
-        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message,$this->getInfo()));
     }
 
     public function keepalive(Envelope $envelope, ?int $seconds = null): void
@@ -130,5 +130,12 @@ final class GpsReceiver implements KeepaliveReceiverInterface
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
+    }
+
+    private function getInfo(): array
+    {
+        $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
+
+        return $subscription->info() ?? [];
     }
 }
