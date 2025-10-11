@@ -12,22 +12,30 @@ use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
-use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
+use Symfony\Component\Messenger\Transport\Receiver\ReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Throwable;
 
 /**
  * @author Ronald Marfoldi <ronald.marfoldi@petitpress.sk>
  */
-final class GpsReceiver implements KeepaliveReceiverInterface
+final class GpsReceiver implements ReceiverInterface
 {
-    public const DEFAULT_KEEPALIVE_SECONDS = 5;
+    private PubSubClient $pubSubClient;
+    private GpsConfigurationInterface $gpsConfiguration;
+    private SerializerInterface $serializer;
+
+    private array $subcriptionInfo;
 
     public function __construct(
-        private PubSubClient $pubSubClient,
-        private GpsConfigurationInterface $gpsConfiguration,
-        private SerializerInterface $serializer
-    ) {
+        PubSubClient              $pubSubClient,
+        GpsConfigurationInterface $gpsConfiguration,
+        SerializerInterface       $serializer
+    )
+    {
+        $this->pubSubClient = $pubSubClient;
+        $this->gpsConfiguration = $gpsConfiguration;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -51,6 +59,30 @@ final class GpsReceiver implements KeepaliveReceiverInterface
     }
 
     /**
+     * Creates Symfony Envelope from Google Pub/Sub Message.
+     * It adds stamp with received native Google Pub/Sub message.
+     */
+    private function createEnvelopeFromPubSubMessage(Message $message): Envelope
+    {
+        try {
+            $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $exception) {
+            throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
+        }
+
+        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message, $this->getInfo()));
+    }
+
+    private function getInfo(): array
+    {
+        if (!$this->subcriptionInfo) {
+            $this->subcriptionInfo = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName())->info() ?? [];
+        }
+
+        return $this->subcriptionInfo;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function ack(Envelope $envelope): void
@@ -60,33 +92,7 @@ final class GpsReceiver implements KeepaliveReceiverInterface
 
             $this->pubSubClient
                 ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->acknowledge($gpsReceivedStamp->getGpsMessage())
-            ;
-        } catch (Throwable $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
-        }
-    }
-
-    /**
-     * Called when handling the message failed and allows to warn PUB/SUB not to wait the ack.
-     * After warning PUB/SUB, it will try to redeliver the message according to set up retry policy.
-     *
-     * @throws TransportException If there is an issue communicating with the transport
-     *
-     * @see https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions#RetryPolicy
-     */
-    public function reject(Envelope $envelope): void
-    {
-        try {
-            $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
-
-            $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
-
-            if ($this->gpsConfiguration->shouldUseMessengerRetry()) {
-                $subscription->acknowledge($gpsReceivedStamp->getGpsMessage());
-            } else {
-                $subscription->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
-            }
+                ->acknowledge($gpsReceivedStamp->getGpsMessage());
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
@@ -103,39 +109,23 @@ final class GpsReceiver implements KeepaliveReceiverInterface
     }
 
     /**
-     * Creates Symfony Envelope from Google Pub/Sub Message.
-     * It adds stamp with received native Google Pub/Sub message.
+     * Called when handling the message failed and allows to warn PUB/SUB not to wait the ack.
+     * After warning PUB/SUB, it will try to redeliver the message according to set up retry policy.
+     *
+     * @throws TransportException If there is an issue communicating with the transport
+     *
+     * @see https://cloud.google.com/pubsub/docs/reference/rest/v1/projects.subscriptions#RetryPolicy
      */
-    private function createEnvelopeFromPubSubMessage(Message $message): Envelope
-    {
-        try {
-            /** @var array<string, mixed> $rawData */
-            $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
-        }
-
-        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message,$this->getInfo()));
-    }
-
-    public function keepalive(Envelope $envelope, ?int $seconds = null): void
+    public function reject(Envelope $envelope): void
     {
         try {
             $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
 
             $this->pubSubClient
                 ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), $seconds ?? self::DEFAULT_KEEPALIVE_SECONDS)
-            ;
+                ->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
-    }
-
-    private function getInfo(): array
-    {
-        $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
-
-        return $subscription->info() ?? [];
     }
 }
