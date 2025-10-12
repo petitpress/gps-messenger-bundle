@@ -16,7 +16,7 @@ final class GpsReceivedStamp implements StampInterface
     private ?int $maxDeliveryAttempts = null;
     private ?string $deadLetterTopic = null;
 
-    public function __construct(Message $gpsMessage, array $subcriptionInfo)
+    public function __construct(Message $gpsMessage, array $subcriptionInfo = [])
     {
         $this->gpsMessage = $gpsMessage;
         $this->maxDeliveryAttempts = $subcriptionInfo['deadLetterPolicy']['maxDeliveryAttempts'] ?? null;
