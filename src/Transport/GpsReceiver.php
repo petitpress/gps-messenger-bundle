@@ -9,6 +9,7 @@ use Google\Cloud\PubSub\PubSubClient;
 use JsonException;
 use LogicException;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceiverOptionsStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
@@ -24,6 +25,7 @@ final class GpsReceiver implements ReceiverInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+    private array $subcriptionInfo;
 
     public function __construct(
         PubSubClient $pubSubClient,
@@ -117,6 +119,15 @@ final class GpsReceiver implements ReceiverInterface
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
-        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+        return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message))->with(new GpsReceiverOptionsStamp($this->getInfo()));
+    }
+
+    private function getInfo(): array
+    {
+        if (!$this->subcriptionInfo) {
+            $this->subcriptionInfo = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName())->info() ?? [];
+        }
+
+        return $this->subcriptionInfo;
     }
 }
