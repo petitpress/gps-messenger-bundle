@@ -65,7 +65,7 @@ class GpsSenderTest extends TestCase
     public function testItDoesNotPublishIfTheLastStampIsOfTypeRedeliveryWithRedeliveryDisabled(): void
     {
         $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
-        $envelopeArray = ['body' => []];
+        $envelopeArray = ['body' => '{}'];
 
         $this->serializerMock
             ->expects(static::once())
@@ -89,7 +89,7 @@ class GpsSenderTest extends TestCase
     public function testItPublishesIfTheLastStampIsOfTypeRedeliveryWithRedeliveryEnabled(): void
     {
         $envelope = EnvelopeFactory::create(new RedeliveryStamp(0));
-        $envelopeArray = ['body' => []];
+        $envelopeArray = ['body' => '{}'];
 
         $this->serializerMock
             ->expects(static::once())
@@ -125,7 +125,7 @@ class GpsSenderTest extends TestCase
     public function testItPublishesWithOrderingKey(): void
     {
         $envelope = EnvelopeFactory::create(new OrderingKeyStamp(self::ORDERED_KEY));
-        $envelopeArray = ['body' => []];
+        $envelopeArray = ['body' => '{}'];
 
         $this->serializerMock
             ->expects(static::once())
@@ -143,7 +143,7 @@ class GpsSenderTest extends TestCase
         $this->topicMock
             ->expects(static::once())
             ->method('publish')
-            ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => self::ORDERED_KEY]))
+            ->with(new Message(['data' => '{}', 'orderingKey' => self::ORDERED_KEY]))
         ;
 
         $this->pubSubClientMock
@@ -158,7 +158,7 @@ class GpsSenderTest extends TestCase
     public function testItPublishesWithoutOrderingKey(): void
     {
         $envelope = EnvelopeFactory::create();
-        $envelopeArray = ['body' => []];
+        $envelopeArray = ['body' => '{}'];
 
         $this->serializerMock
             ->expects(static::once())
@@ -176,7 +176,7 @@ class GpsSenderTest extends TestCase
         $this->topicMock
             ->expects(static::once())
             ->method('publish')
-            ->with(new Message(['data' => json_encode($envelopeArray), 'orderingKey' => null]))
+            ->with(new Message(['data' => '{}', 'orderingKey' => null]))
         ;
 
         $this->pubSubClientMock
@@ -193,7 +193,7 @@ class GpsSenderTest extends TestCase
     {
         $attributes = ['foo' => 'bar'];
         $envelope = EnvelopeFactory::create(new AttributesStamp($attributes));
-        $envelopeArray = ['body' => []];
+        $envelopeArray = ['body' => '{}'];
 
         $this->serializerMock
             ->expects(static::once())
@@ -212,7 +212,7 @@ class GpsSenderTest extends TestCase
             ->expects(static::once())
             ->method('publish')
             ->with(new Message([
-                'data' => json_encode($envelopeArray),
+                'data' => '{}',
                 'attributes' => $attributes,
             ]))
         ;
@@ -230,7 +230,7 @@ class GpsSenderTest extends TestCase
     {
         $options = ['foo' => 'bar'];
         $envelope = EnvelopeFactory::create(new GpsSenderOptionsStamp($options));
-        $envelopeArray = ['body' => []];
+        $envelopeArray = ['body' => '{}'];
 
         $this->serializerMock
             ->expects(static::once())
@@ -249,7 +249,7 @@ class GpsSenderTest extends TestCase
             ->expects(static::once())
             ->method('publish')
             ->with(new Message([
-                'data' => json_encode($envelopeArray),
+                'data' => '{}',
                 'attributes' => [],
             ]), $options)
         ;
