@@ -21,8 +21,8 @@ and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme).
 
 | Version                                                               | Status             | Symfony Versions |
 |-----------------------------------------------------------------------|--------------------|------------------|
-| [3.x](https://github.com/petitpress/gps-messenger-bundle/tree/3.x)    | Actively Supported | >= 5.4           |
-| [4.x](https://github.com/petitpress/gps-messenger-bundle/tree/master) | In development     | >= 7.2           |
+| [3.x](https://github.com/petitpress/gps-messenger-bundle/tree/3.x)    | Actively Supported | >= 5.4, <8.0     |
+| [4.x](https://github.com/petitpress/gps-messenger-bundle/tree/master) | In development     | >= 7.3           |
 
 ## Installation
 
@@ -143,6 +143,8 @@ petit_press_gps_messenger:
 * `AttributesStamp`: use to add contextual metadata to serialized messages. 
   For more information, read an [official documentation](https://cloud.google.com/pubsub/docs/publisher#using-attributes). 
   Can be very useful when used together with [subscription filters](https://cloud.google.com/pubsub/docs/subscription-message-filter).
+
+* `GpsSenderOptionsStamp`: use to specify options for the second parameter of the `publish` method in the Pub/Sub client.
 
 ### Step 6: Create topics from config
 

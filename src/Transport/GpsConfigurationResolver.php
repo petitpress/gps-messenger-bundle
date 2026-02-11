@@ -52,7 +52,7 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             ->setDefault('use_messenger_retry', false)
             ->setAllowedTypes('use_messenger_retry', 'bool')
             ->setDefault('client_config', [])
-            ->setDefault('topic', function (OptionsResolver $topicResolver): void {
+            ->setOptions('topic', function (OptionsResolver $topicResolver): void {
                 $topicResolver
                     ->setDefault('name', self::DEFAULT_TOPIC_NAME)
                     ->setDefault('createIfNotExist', true)
@@ -62,14 +62,14 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
                     ->setAllowedTypes('options', 'array')
                 ;
             })
-            ->setDefault(
+            ->setOptions(
                 'subscription',
                 function (OptionsResolver $resolver, Options $parentOptions) use ($subscriptionOptionsNormalizer, $subscriptionPullOptionsNormalizer): void {
                     $resolver
                         ->setDefault('name', $parentOptions['topic']['name'])
                         ->setDefault('createIfNotExist', true)
                         ->setDefault('options', [])
-                        ->setDefault(
+                        ->setOptions(
                             'pull',
                             function (OptionsResolver $pullResolver): void {
                                 $pullResolver

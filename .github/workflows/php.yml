@@ -10,18 +10,22 @@ on:
 
 jobs:
   build:
-    name: PHP ${{ matrix.php-version }} Sf ${{ matrix.symfony-version }}
+    name: PHP ${{ matrix.php-version }} Sf ${{ matrix.symfony-version }} ${{ matrix.dependencies }}
     runs-on: ubuntu-latest
+
+    env:
+      SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
 
     strategy:
       matrix:
-        include:
-          - php-version: 8.2
-            symfony-version: 7.2.*
-          - php-version: 8.3
-            symfony-version: 7.2.*
-          - php-version: 8.4
-            symfony-version: 7.2.*
+        php-version:
+          - 8.4
+          - 8.5
+        symfony-version:
+          - 7.4.*
+          - 8.0.*
+        dependencies:
+          - highest
 
     steps:
       - name: "Checkout"
@@ -30,29 +34,28 @@ jobs:
       - name: "Setup PHP"
         uses: shivammathur/setup-php@v2
         with:
+          coverage: pcov
+          ini-values: memory_limit=-1, date.timezone=UTC, session.gc_probability=0
           php-version: ${{ matrix.php-version }}
-          tools: composer:v2
+          tools: flex
 
       - name: Validate composer.json
         run: composer validate
 
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
+      - name: Install Composer dependencies (${{ matrix.dependencies }})
+        uses: ramsey/composer-install@v2
         with:
-          path: vendor
-          key: composer-${{ runner.os }}-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}-${{ matrix.symfony-version }}
-          restore-keys: |
-            composer-${{ runner.os }}-${{ matrix.php-version }}-
-
-      - name: Install dependencies
-        env:
-          SYMFONY_REQUIRE: ${{ matrix.symfony-version }}
-        if: steps.composer-cache.outputs.cache-hit != 'true'  
-        run: composer update --prefer-dist --no-progress --no-ansi --no-interaction --no-scripts
+          dependency-versions: ${{ matrix.dependencies }}
 
       - name: Run unit tests
-        run: vendor/bin/phpunit
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: Check test coverage
+        id: test-coverage
+        uses: johanvanhelden/gha-clover-test-coverage-check@v1
+        with:
+          percentage: "85"
+          filename: "coverage.xml"
 
       - name: Run style tests
         run: vendor/bin/ecs check -vv

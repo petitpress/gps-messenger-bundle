@@ -85,9 +85,10 @@ final class GpsTransport implements TransportInterface, KeepaliveReceiverInterfa
         $subscription = $topic->subscription($this->gpsConfiguration->getSubscriptionName());
 
         if (true === $this->gpsConfiguration->isSubscriptionCreationEnabled() && false === $subscription->exists()) {
+            $subscriptionOptions = $this->normalizeSubscriptionOptions();
             $topic->subscribe(
                 $this->gpsConfiguration->getSubscriptionName(),
-                $this->gpsConfiguration->getSubscriptionOptions()
+                $subscriptionOptions
             );
         }
     }
@@ -95,5 +96,27 @@ final class GpsTransport implements TransportInterface, KeepaliveReceiverInterfa
     public function keepalive(Envelope $envelope, ?int $seconds = null): void
     {
         $this->getReceiver()->keepalive($envelope, $seconds);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function normalizeSubscriptionOptions(): array
+    {
+        /** @var array{deadLetterPolicy?: array{deadLetterTopic?: string, maxDeliveryAttempts?: int}} $subscriptionOptions */
+        $subscriptionOptions = $this->gpsConfiguration->getSubscriptionOptions();
+
+        // normalize dead letter topic format
+        if (! isset($subscriptionOptions['deadLetterPolicy']['deadLetterTopic'])) {
+            return $subscriptionOptions;
+        }
+
+        $deadLetterTopic = $subscriptionOptions['deadLetterPolicy']['deadLetterTopic'];
+        if (! str_starts_with($deadLetterTopic, 'projects/')) {
+            $subscriptionOptions['deadLetterPolicy']['deadLetterTopic'] =
+                $this->pubSubClient->topic($this->gpsConfiguration->getTopicName());
+        }
+
+        return $subscriptionOptions;
     }
 }
