@@ -22,7 +22,7 @@ and [some bridge](https://github.com/sroze/messenger-enqueue-transport#readme).
 | Version                                                               | Status             | Symfony Versions |
 |-----------------------------------------------------------------------|--------------------|------------------|
 | [3.x](https://github.com/petitpress/gps-messenger-bundle/tree/3.x)    | Actively Supported | >= 5.4, <8.0     |
-| [4.x](https://github.com/petitpress/gps-messenger-bundle/tree/master) | In development     | >= 7.3           |
+| [4.x](https://github.com/petitpress/gps-messenger-bundle/tree/master) | In development     | >= 7.4           |
 
 ## Installation
 
