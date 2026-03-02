@@ -110,13 +110,12 @@ final class GpsReceiver implements KeepaliveReceiverInterface
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
         try {
-            /** @var array<string, mixed> $rawData */
+            /** @var array{body: string, headers?: array<string, string>} $rawData */
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
-        /** @var array{body: string, headers?: array<string, string>} $rawData */
         $envelope = $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
 
         $attributes = $message->attributes();
