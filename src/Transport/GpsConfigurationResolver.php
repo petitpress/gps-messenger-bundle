@@ -141,35 +141,35 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
      */
     private function getMergedOptions(string $dsn, array $options): array
     {
-        $dnsOptions = [];
-        $parsedDnsOptions = parse_url($dsn);
+        $dsnOptions = [];
+        $parsedDsnOptions = parse_url($dsn);
 
-        $dsnQueryOptions = $parsedDnsOptions['query'] ?? null;
+        $dsnQueryOptions = $parsedDsnOptions['query'] ?? null;
         if ($dsnQueryOptions !== null && $dsnQueryOptions !== '') {
-            parse_str($dsnQueryOptions, $dnsOptions);
+            parse_str($dsnQueryOptions, $dsnOptions);
         }
 
-        $dnsPathOption = $parsedDnsOptions['path'] ?? null;
-        if ($dnsPathOption !== null && $dnsPathOption !== '') {
-            if (! isset($dnsOptions['topic']) || ! is_array($dnsOptions['topic'])) {
-                $dnsOptions['topic'] = [];
+        $dsnPathOption = $parsedDsnOptions['path'] ?? null;
+        if ($dsnPathOption !== null && $dsnPathOption !== '') {
+            if (! isset($dsnOptions['topic']) || ! is_array($dsnOptions['topic'])) {
+                $dsnOptions['topic'] = [];
             }
-            $dnsOptions['topic']['name'] = substr($dnsPathOption, 1);
+            $dsnOptions['topic']['name'] = substr($dsnPathOption, 1);
         }
 
-        if (isset($dnsOptions['use_messenger_retry']) && is_string($dnsOptions['use_messenger_retry'])) {
-            $dnsOptions['use_messenger_retry'] = $this->toBool($dnsOptions['use_messenger_retry'], false);
+        if (isset($dsnOptions['use_messenger_retry']) && is_string($dsnOptions['use_messenger_retry'])) {
+            $dsnOptions['use_messenger_retry'] = $this->toBool($dsnOptions['use_messenger_retry'], false);
         }
 
-        if (isset($dnsOptions['topic']['createIfNotExist'])) {
-            $dnsOptions['topic']['createIfNotExist'] = $this->toBool($dnsOptions['topic']['createIfNotExist'], true);
+        if (isset($dsnOptions['topic']['createIfNotExist']) && is_string($dsnOptions['topic']['createIfNotExist'])) {
+            $dsnOptions['topic']['createIfNotExist'] = $this->toBool($dsnOptions['topic']['createIfNotExist'], true);
         }
 
-        if (isset($dnsOptions['subscription']['createIfNotExist'])) {
-            $dnsOptions['subscription']['createIfNotExist'] = $this->toBool($dnsOptions['subscription']['createIfNotExist'], true);
+        if (isset($dsnOptions['subscription']['createIfNotExist']) && is_string($dsnOptions['subscription']['createIfNotExist'])) {
+            $dsnOptions['subscription']['createIfNotExist'] = $this->toBool($dsnOptions['subscription']['createIfNotExist'], true);
         }
 
-        return array_merge($dnsOptions, $options);
+        return array_merge($dsnOptions, $options);
     }
 
     private function toBool(string $value, bool $default): bool
