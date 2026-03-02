@@ -112,7 +112,7 @@ final class GpsReceiver implements ReceiverInterface
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
         try {
-            /** @var array<string, mixed> $rawData */
+            /** @var array{body: string, headers?: array<string, string>} $rawData */
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
