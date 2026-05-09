@@ -23,7 +23,8 @@ final class GpsTransport implements TransportInterface, KeepaliveReceiverInterfa
     public function __construct(
         private PubSubClient $pubSubClient,
         private GpsConfigurationInterface $gpsConfiguration,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private EncodingStrategy $encodingStrategy = EncodingStrategy::Wrapped,
     ) {
     }
 
@@ -62,13 +63,23 @@ final class GpsTransport implements TransportInterface, KeepaliveReceiverInterfa
     public function getReceiver(): KeepaliveReceiverInterface
     {
         /** @psalm-suppress RedundantPropertyInitializationCheck */
-        return $this->receiver ??= new GpsReceiver($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
+        return $this->receiver ??= new GpsReceiver(
+            $this->pubSubClient,
+            $this->gpsConfiguration,
+            $this->serializer,
+            $this->encodingStrategy,
+        );
     }
 
     public function getSender(): SenderInterface
     {
         /** @psalm-suppress RedundantPropertyInitializationCheck */
-        return $this->sender ??= new GpsSender($this->pubSubClient, $this->gpsConfiguration, $this->serializer);
+        return $this->sender ??= new GpsSender(
+            $this->pubSubClient,
+            $this->gpsConfiguration,
+            $this->serializer,
+            $this->encodingStrategy,
+        );
     }
 
     public function setup(): void

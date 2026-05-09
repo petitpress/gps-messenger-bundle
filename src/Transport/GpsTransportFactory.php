@@ -16,18 +16,12 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  */
 final class GpsTransportFactory implements TransportFactoryInterface
 {
-    private GpsConfigurationResolverInterface $gpsConfigurationResolver;
-    private ?CacheItemPoolInterface $cache;
-    private ?string $forcedTransport;
-
     public function __construct(
-        GpsConfigurationResolverInterface $gpsConfigurationResolver,
-        ?CacheItemPoolInterface $cache,
-        ?string $forcedTransport
+        private GpsConfigurationResolverInterface $gpsConfigurationResolver,
+        private ?CacheItemPoolInterface $cache,
+        private ?string $forcedTransport,
+        private EncodingStrategy $encodingStrategy = EncodingStrategy::Wrapped,
     ) {
-        $this->gpsConfigurationResolver = $gpsConfigurationResolver;
-        $this->cache = $cache;
-        $this->forcedTransport = $forcedTransport;
     }
 
     /**
@@ -53,7 +47,8 @@ final class GpsTransportFactory implements TransportFactoryInterface
         return new GpsTransport(
             new PubSubClient($clientConfig),
             $options,
-            $serializer
+            $serializer,
+            $this->encodingStrategy,
         );
     }
 

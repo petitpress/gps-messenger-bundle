@@ -161,11 +161,11 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $dnsOptions['use_messenger_retry'] = $this->toBool($dnsOptions['use_messenger_retry'], false);
         }
 
-        if (isset($dnsOptions['topic']['createIfNotExist'])) {
+        if (isset($dnsOptions['topic']['createIfNotExist']) && is_string($dnsOptions['topic']['createIfNotExist'])) {
             $dnsOptions['topic']['createIfNotExist'] = $this->toBool($dnsOptions['topic']['createIfNotExist'], true);
         }
 
-        if (isset($dnsOptions['subscription']['createIfNotExist'])) {
+        if (isset($dnsOptions['subscription']['createIfNotExist']) && is_string($dnsOptions['subscription']['createIfNotExist'])) {
             $dnsOptions['subscription']['createIfNotExist'] = $this->toBool($dnsOptions['subscription']['createIfNotExist'], true);
         }
 

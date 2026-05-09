@@ -20,18 +20,12 @@ use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
  */
 final class GpsSender implements SenderInterface
 {
-    private PubSubClient $pubSubClient;
-    private GpsConfigurationInterface $gpsConfiguration;
-    private SerializerInterface $serializer;
-
     public function __construct(
-        PubSubClient $pubSubClient,
-        GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        private PubSubClient $pubSubClient,
+        private GpsConfigurationInterface $gpsConfiguration,
+        private SerializerInterface $serializer,
+        private EncodingStrategy $encodingStrategy = EncodingStrategy::Wrapped,
     ) {
-        $this->pubSubClient = $pubSubClient;
-        $this->gpsConfiguration = $gpsConfiguration;
-        $this->serializer = $serializer;
     }
 
     /**
@@ -39,14 +33,8 @@ final class GpsSender implements SenderInterface
      */
     public function send(Envelope $envelope): Envelope
     {
+        /** @var array{body: string, headers?: array<string, string>} $encodedMessage */
         $encodedMessage = $this->serializer->encode($envelope);
-
-        $messageBuilder = new MessageBuilder();
-        try {
-            $messageBuilder = $messageBuilder->setData(json_encode($encodedMessage, JSON_THROW_ON_ERROR));
-        } catch (\JsonException $exception) {
-            throw new TransportException($exception->getMessage(), 0, $exception);
-        }
 
         if (! $this->gpsConfiguration->shouldUseMessengerRetry()) {
             $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
@@ -56,15 +44,18 @@ final class GpsSender implements SenderInterface
             }
         }
 
+        $messageBuilder = $this->setMessage(new MessageBuilder(), $encodedMessage);
+
         $orderingKeyStamp = $envelope->last(OrderingKeyStamp::class);
         if ($orderingKeyStamp instanceof OrderingKeyStamp) {
             $messageBuilder = $messageBuilder->setOrderingKey($orderingKeyStamp->getOrderingKey());
         }
 
         $attributesStamp = $envelope->last(AttributesStamp::class);
-        if ($attributesStamp instanceof AttributesStamp) {
-            $messageBuilder = $messageBuilder->setAttributes($attributesStamp->getAttributes());
-        }
+        $stampAttributes = $attributesStamp instanceof AttributesStamp ? $attributesStamp->getAttributes() : [];
+        $messageBuilder = $messageBuilder->setAttributes(
+            $this->buildAttributes($encodedMessage['headers'] ?? [], $stampAttributes)
+        );
 
         $senderOptionsStamp = $envelope->last(GpsSenderOptionsStamp::class);
         $options = [];
@@ -77,5 +68,45 @@ final class GpsSender implements SenderInterface
         ;
 
         return $envelope;
+    }
+
+    /**
+     * @param array{body: string, headers?: array<string, string>} $encodedMessage
+     */
+    private function setMessage(MessageBuilder $messageBuilder, array $encodedMessage): MessageBuilder
+    {
+        if (EncodingStrategy::Flat === $this->encodingStrategy || EncodingStrategy::Hybrid === $this->encodingStrategy) {
+            return $messageBuilder->setData($encodedMessage['body']);
+        }
+
+        try {
+            return $messageBuilder->setData(json_encode($encodedMessage, JSON_THROW_ON_ERROR));
+        } catch (\JsonException $exception) {
+            throw new TransportException($exception->getMessage(), 0, $exception);
+        }
+    }
+
+    /**
+     * Computes the final Pub/Sub attribute set:
+     *   - Wrapped: only AttributesStamp values are exposed (headers are inside the JSON body).
+     *   - Flat/Hybrid: serializer headers + AttributesStamp values (stamp wins on collision),
+     *     plus the reserved encoding-version attribute appended last so AttributesStamp can never override it.
+     *
+     * @param array<string, string> $headers
+     * @param array<string, string> $stampAttributes
+     *
+     * @return array<string, string>
+     */
+    private function buildAttributes(array $headers, array $stampAttributes): array
+    {
+        if (EncodingStrategy::Wrapped === $this->encodingStrategy) {
+            return $stampAttributes;
+        }
+
+        return array_merge(
+            $headers,
+            $stampAttributes,
+            [EncodingStrategy::ENCODING_ATTRIBUTE => EncodingStrategy::ENCODING_VERSION],
+        );
     }
 }
