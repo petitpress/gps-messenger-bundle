@@ -110,19 +110,21 @@ final class GpsReceiver implements ReceiverInterface
     /**
      * Creates Symfony Envelope from Google Pub/Sub Message.
      * It adds stamp with received native Google Pub/Sub message.
+     *
+     * In Hybrid mode the encoding format is detected per-message via the reserved
+     * EncodingStrategy::ENCODING_ATTRIBUTE Pub/Sub attribute set by Flat/Hybrid senders.
+     * Messages without it (e.g. published by older bundle versions still using the
+     * Wrapped strategy) fall through to wrapped decoding, which is the safe default.
      */
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
-        if (EncodingStrategy::Hybrid === $this->encodingStrategy && str_starts_with($message->data(), '{"body":"')) {
-            $rawData = $this->decodeWrappedMessage($message);
+        if (EncodingStrategy::Flat === $this->encodingStrategy || $this->isFlatEncoded($message)) {
+            $attributes = $message->attributes();
+            unset($attributes[EncodingStrategy::ENCODING_ATTRIBUTE]);
 
-            return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
-        }
-
-        if (EncodingStrategy::Hybrid === $this->encodingStrategy || EncodingStrategy::Flat === $this->encodingStrategy) {
             $envelope = $this->serializer->decode([
                 'body' => $message->data(),
-                'headers' => $message->attributes(),
+                'headers' => $attributes,
             ]);
 
             return $envelope->with(new GpsReceivedStamp($message));
@@ -133,13 +135,22 @@ final class GpsReceiver implements ReceiverInterface
         return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
     }
 
+    private function isFlatEncoded(Message $message): bool
+    {
+        if (EncodingStrategy::Hybrid !== $this->encodingStrategy) {
+            return false;
+        }
+
+        return $message->attribute(EncodingStrategy::ENCODING_ATTRIBUTE) === EncodingStrategy::ENCODING_VERSION;
+    }
+
     /**
-     * @return mixed[]
+     * @return array{body: string, headers?: array<string, string>}
      */
     private function decodeWrappedMessage(Message $message): array
     {
         try {
-            /** @var array<string, mixed> $rawData */
+            /** @var array{body: string, headers?: array<string, string>} $rawData */
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);

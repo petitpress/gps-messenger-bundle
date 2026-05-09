@@ -7,6 +7,7 @@ namespace PetitPress\GpsMessengerBundle\Tests\DependencyInjection;
 use PetitPress\GpsMessengerBundle\DependencyInjection\PetitPressGpsMessengerExtension;
 use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransportFactory;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -14,6 +15,7 @@ use Symfony\Component\Yaml\Parser;
 
 class PetitPressGpsMessengerExtensionTest extends TestCase
 {
+    #[IgnoreDeprecations]
     public function testSimpleConfiguration(): void
     {
         $configuration = new ContainerBuilder();
@@ -26,6 +28,7 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
         $cacheArgument = $gpsTransportFactoryDefinition->getArgument(1);
         static::assertInstanceOf(Reference::class, $cacheArgument);
         static::assertEquals('cache.app', (string) $cacheArgument);
+        static::assertEquals(EncodingStrategy::Wrapped, $gpsTransportFactoryDefinition->getArgument(3));
     }
 
     /**

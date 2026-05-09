@@ -32,7 +32,7 @@ as Google needs to access some variables through `getenv`. To do so, use putenv 
 
 List of Google Pub/Sub configurable variables :
 ```dotenv
-# use these for production environemnt:
+# use these for production environment:
 GOOGLE_APPLICATION_CREDENTIALS='google-pubsub-credentials.json'
 GCLOUD_PROJECT='project-id'
 
@@ -69,13 +69,13 @@ framework:
                         apiEndpoint: 'https://europe-west3-pubsub.googleapis.com'
                     topic: # optional (default name: messages)
                         name: 'messages'
-                        options: # optional create options if not exists (default: []), for all options take at look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/topic?method=create
+                        options: # optional create options if not exists (default: []), for all options take a look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/topic?method=create
                             labels:
                                 - label1
                                 - label2
                     subscription: # optional (default the same as topic.name)
                         name: 'messages'
-                        options: # optional create options if not exists (default: []), fol all options take a look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/subscription?method=create
+                        options: # optional create options if not exists (default: []), for all options take a look at https://googleapis.github.io/google-cloud-php/#/docs/google-cloud/v0.188.0/pubsub/subscription?method=create
                             enableExactlyOnceDelivery: true
                             labels:
                                 - label1
@@ -118,7 +118,30 @@ Configure the cache service where authentication tokens are stored. The default 
 
 petit_press_gps_messenger:
     auth_cache: 'cache.app'
+    encoding_strategy: 'wrapped' # default; deprecated, see below
 ```
+
+#### Encoding strategy
+
+The `encoding_strategy` option controls how Symfony Messenger envelopes are mapped to Pub/Sub messages:
+
+| Value | Behavior |
+| ----- | -------- |
+| `wrapped` *(default, deprecated)* | Legacy format: the Symfony serializer output (`{body, headers}`) is JSON-encoded into the Pub/Sub message data; serializer headers are not exposed as Pub/Sub attributes. Will be removed in 4.0. |
+| `hybrid` | **Sender** publishes flat (see below). **Receiver** can decode both legacy `wrapped` payloads and new `flat` payloads. Use this on receivers during migration. |
+| `flat` | New format: the serializer body is published as the Pub/Sub message `data`, and serializer headers are published as Pub/Sub `attributes`. Recommended for new projects. |
+
+`hybrid`/`flat` senders mark each published message with a reserved Pub/Sub attribute (`ppgps-encoding-version`); the `hybrid` receiver routes per-message based on that attribute. Messages published by older bundle versions (no attribute) are decoded as `wrapped` — including ones already in the topic when the upgrade is deployed. The reserved attribute key cannot be overridden via `AttributesStamp`.
+
+Recommended migration path for existing deployments:
+
+1. Deploy receivers with `encoding_strategy: 'hybrid'`. They will continue decoding legacy `wrapped` messages while also accepting new `flat` messages.
+2. Once all receivers are on `hybrid`, switch publishers to `'hybrid'` (or `'flat'`). New messages will be published in the flat format and tagged with the encoding attribute.
+3. After the legacy backlog has drained, switch everything to `'flat'`.
+
+For new projects, set `encoding_strategy: 'flat'` from the start.
+
+When using `hybrid` or `flat`, an `AttributesStamp` is merged with the serializer headers (stamp values take precedence on key collisions, except for the reserved encoding attribute).
 
 ### Step 5: Use available stamps if needed
 

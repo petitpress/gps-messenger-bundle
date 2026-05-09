@@ -24,5 +24,6 @@ return static function (ECSConfig $ecsConfig): void {
 
     $ecsConfig->skip([
         ClassAttributesSeparationFixer::class,
+        __DIR__ . '/src/DependencyInjection/Configuration.php',
     ]);
 };

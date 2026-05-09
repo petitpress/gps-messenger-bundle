@@ -41,17 +41,15 @@ final class GpsSender implements SenderInterface
      */
     public function send(Envelope $envelope): Envelope
     {
-        /** @var array{body: string, headers: null|array<string, string>} $encodedMessage */
+        /** @var array{body: string, headers?: array<string, string>} $encodedMessage */
         $encodedMessage = $this->serializer->encode($envelope);
 
-        $messageBuilder = new MessageBuilder();
-        $messageBuilder = $this->setMessage($messageBuilder, $encodedMessage);
-
-        $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
-        if ($redeliveryStamp instanceof RedeliveryStamp) {
+        if ($envelope->last(RedeliveryStamp::class) instanceof RedeliveryStamp) {
             // do not try to redeliver, message wasn't acknowledged, so let's Google Pub/Sub do its job with retry policy
             return $envelope;
         }
+
+        $messageBuilder = $this->setMessage(new MessageBuilder(), $encodedMessage);
 
         $orderingKeyStamp = $envelope->last(OrderingKeyStamp::class);
         if ($orderingKeyStamp instanceof OrderingKeyStamp) {
@@ -59,9 +57,10 @@ final class GpsSender implements SenderInterface
         }
 
         $attributesStamp = $envelope->last(AttributesStamp::class);
-        if ($attributesStamp instanceof AttributesStamp) {
-            $messageBuilder = $messageBuilder->setAttributes($attributesStamp->getAttributes());
-        }
+        $stampAttributes = $attributesStamp instanceof AttributesStamp ? $attributesStamp->getAttributes() : [];
+        $messageBuilder = $messageBuilder->setAttributes(
+            $this->buildAttributes($encodedMessage['headers'] ?? [], $stampAttributes)
+        );
 
         $this->pubSubClient
             ->topic($this->gpsConfiguration->getTopicName())
@@ -72,14 +71,12 @@ final class GpsSender implements SenderInterface
     }
 
     /**
-     * @param array{body: string, headers: null|array<string, string>} $encodedMessage
+     * @param array{body: string, headers?: array<string, string>} $encodedMessage
      */
     private function setMessage(MessageBuilder $messageBuilder, array $encodedMessage): MessageBuilder
     {
         if (EncodingStrategy::Flat === $this->encodingStrategy || EncodingStrategy::Hybrid === $this->encodingStrategy) {
-            return $messageBuilder
-                ->setData($encodedMessage['body'])
-                ->setAttributes($encodedMessage['headers'] ?? []);
+            return $messageBuilder->setData($encodedMessage['body']);
         }
 
         try {
@@ -87,5 +84,29 @@ final class GpsSender implements SenderInterface
         } catch (\JsonException $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
+    }
+
+    /**
+     * Computes the final Pub/Sub attribute set:
+     *   - Wrapped: only AttributesStamp values are exposed (headers are inside the JSON body).
+     *   - Flat/Hybrid: serializer headers + AttributesStamp values (stamp wins on collision),
+     *     plus the reserved encoding-version attribute appended last so AttributesStamp can never override it.
+     *
+     * @param array<string, string> $headers
+     * @param array<string, string> $stampAttributes
+     *
+     * @return array<string, string>
+     */
+    private function buildAttributes(array $headers, array $stampAttributes): array
+    {
+        if (EncodingStrategy::Wrapped === $this->encodingStrategy) {
+            return $stampAttributes;
+        }
+
+        return array_merge(
+            $headers,
+            $stampAttributes,
+            [EncodingStrategy::ENCODING_ATTRIBUTE => EncodingStrategy::ENCODING_VERSION],
+        );
     }
 }

@@ -148,16 +148,23 @@ class GpsReceiverTest extends TestCase
     }
 
 
-    public function testGetFlat(): void
+    #[DataProvider('flatEncodingStrategies')]
+    public function testGetFlat(EncodingStrategy $encodingStrategy): void
     {
         $gpsReceiver = new GpsReceiver(
             $this->pubSubClientMock,
             $this->gpsConfigurationMock,
             $this->serializerMock,
-            EncodingStrategy::Flat,
+            $encodingStrategy,
         );
 
-        $gpsMessage = new Message(['data' => '{"body":"foo"}']);
+        $gpsMessage = new Message([
+            'data' => '{"foo":"bar"}',
+            'attributes' => [
+                'type' => 'App\\Message',
+                EncodingStrategy::ENCODING_ATTRIBUTE => EncodingStrategy::ENCODING_VERSION,
+            ],
+        ]);
 
         $this->gpsConfigurationMock
             ->expects(static::once())
@@ -190,7 +197,7 @@ class GpsReceiverTest extends TestCase
         $this->serializerMock
             ->expects(static::once())
             ->method('decode')
-            ->with(['body' => '{"body":"foo"}', 'headers' => []])
+            ->with(['body' => '{"foo":"bar"}', 'headers' => ['type' => 'App\\Message']])
             ->willReturn($gpsEnvelope)
         ;
 
@@ -204,6 +211,59 @@ class GpsReceiverTest extends TestCase
         self::assertSame(1, $i);
     }
 
+    public function testHybridFallsBackToWrappedWhenEncodingAttributeMissing(): void
+    {
+        $gpsReceiver = new GpsReceiver(
+            $this->pubSubClientMock,
+            $this->gpsConfigurationMock,
+            $this->serializerMock,
+            EncodingStrategy::Hybrid,
+        );
+
+        // Simulates a message published by an older bundle version (Wrapped sender):
+        // the body has the wrapped shape and no encoding-version attribute is present.
+        $gpsMessage = new Message(['data' => '{"body":"legacy"}']);
+
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getSubscriptionName')
+            ->willReturn(self::SUBSCRIPTION_NAME)
+        ;
+
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getSubscriptionPullOptions')
+            ->willReturn([])
+        ;
+
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('subscription')
+            ->with(self::SUBSCRIPTION_NAME)
+            ->willReturn($this->subscriptionMock)
+        ;
+
+        $this->subscriptionMock
+            ->expects(static::once())
+            ->method('pull')
+            ->with([])
+            ->willReturn([$gpsMessage])
+        ;
+
+        $gpsEnvelope = new Envelope($gpsMessage);
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('decode')
+            ->with(['body' => 'legacy'])
+            ->willReturn($gpsEnvelope)
+        ;
+
+        $envelopes = $gpsReceiver->get();
+        foreach ($envelopes as $envelope) {
+            self::assertEquals($gpsEnvelope->with(new GpsReceivedStamp($gpsMessage)), $envelope);
+        }
+    }
+
     /**
      * @return list<list<EncodingStrategy>>
      */
@@ -211,6 +271,17 @@ class GpsReceiverTest extends TestCase
     {
         return [
             [EncodingStrategy::Wrapped],
+            [EncodingStrategy::Hybrid],
+        ];
+    }
+
+    /**
+     * @return list<list<EncodingStrategy>>
+     */
+    public static function flatEncodingStrategies(): array
+    {
+        return [
+            [EncodingStrategy::Flat],
             [EncodingStrategy::Hybrid],
         ];
     }

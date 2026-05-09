@@ -117,9 +117,9 @@ class GpsTransportTest extends TestCase
             ->method('topic')
             ->willReturn($topicMock);
 
-        $finalEnvelop = $this->gpsTransport->send($envelope);
+        $finalEnvelope = $this->gpsTransport->send($envelope);
 
-        static::assertSame($message, $finalEnvelop->getMessage());
+        static::assertSame($message, $finalEnvelope->getMessage());
     }
 
     public function testSetup(): void
