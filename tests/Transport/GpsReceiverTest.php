@@ -11,6 +11,7 @@ use Google\Cloud\PubSub\Subscription;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsReceiver;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -47,13 +48,12 @@ class GpsReceiverTest extends TestCase
         $this->gpsConfigurationMock = $this->createMock(GpsConfigurationInterface::class);
         $this->pubSubClientMock = $this->createMock(PubSubClient::class);
         $this->subscriptionMock = $this->createMock(Subscription::class);
-        /** @var SerializerInterface&MockObject $serializerMock */
-        $serializerMock = $this->createMock(SerializerInterface::class);
+        $serializerStub = static::createStub(SerializerInterface::class);
 
         $this->gpsReceiver = new GpsReceiver(
             $this->pubSubClientMock,
             $this->gpsConfigurationMock,
-            $serializerMock,
+            $serializerStub,
         );
     }
 
@@ -177,6 +177,7 @@ class GpsReceiverTest extends TestCase
         );
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function testItThrowsAnExceptionInsteadOfRejecting(): void
     {
         $this->expectException(TransportException::class);
