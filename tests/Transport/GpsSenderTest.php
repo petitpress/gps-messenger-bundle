@@ -7,11 +7,13 @@ namespace PetitPress\GpsMessengerBundle\Tests\Transport;
 use Google\Cloud\PubSub\Message;
 use Google\Cloud\PubSub\PubSubClient;
 use Google\Cloud\PubSub\Topic;
+use PetitPress\GpsMessengerBundle\Transport\EncodingStrategy;
 use PetitPress\GpsMessengerBundle\Transport\GpsConfigurationInterface;
 use PetitPress\GpsMessengerBundle\Transport\GpsSender;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\AttributesStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsSenderOptionsStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
@@ -261,5 +263,155 @@ class GpsSenderTest extends TestCase
             ->willReturn($this->topicMock);
 
         self::assertSame($envelope, $this->gpsSender->send($envelope));
+    }
+
+    #[DataProvider('flatEncodingStrategies')]
+    public function testItPublishesFlatOrHybrid(EncodingStrategy $encodingStrategy): void
+    {
+        $gpsSender = new GpsSender(
+            $this->pubSubClientMock,
+            $this->gpsConfigurationMock,
+            $this->serializerMock,
+            $encodingStrategy,
+        );
+
+        $envelope = EnvelopeFactory::create();
+        $envelopeArray = ['body' => '{}'];
+
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
+        $this->topicMock
+            ->expects(static::once())
+            ->method('publish')
+            ->with(new Message([
+                'data' => '{}',
+                'attributes' => [
+                    EncodingStrategy::ENCODING_ATTRIBUTE => EncodingStrategy::ENCODING_VERSION,
+                ],
+            ]))
+        ;
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock)
+        ;
+
+        self::assertSame($envelope, $gpsSender->send($envelope));
+    }
+
+    #[DataProvider('flatEncodingStrategies')]
+    public function testFlatOrHybridMergesSerializerHeadersWithAttributesStamp(EncodingStrategy $encodingStrategy): void
+    {
+        $gpsSender = new GpsSender(
+            $this->pubSubClientMock,
+            $this->gpsConfigurationMock,
+            $this->serializerMock,
+            $encodingStrategy,
+        );
+
+        $envelope = EnvelopeFactory::create(new AttributesStamp(['stamp' => 'value', 'type' => 'overridden']));
+        $envelopeArray = ['body' => '{}', 'headers' => ['type' => 'App\\Message', 'header' => 'value']];
+
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
+        $this->topicMock
+            ->expects(static::once())
+            ->method('publish')
+            ->with(new Message([
+                'data' => '{}',
+                'attributes' => [
+                    'type' => 'overridden',
+                    'header' => 'value',
+                    'stamp' => 'value',
+                    EncodingStrategy::ENCODING_ATTRIBUTE => EncodingStrategy::ENCODING_VERSION,
+                ],
+            ]))
+        ;
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock)
+        ;
+
+        self::assertSame($envelope, $gpsSender->send($envelope));
+    }
+
+    #[DataProvider('flatEncodingStrategies')]
+    public function testEncodingAttributeCannotBeOverriddenByAttributesStamp(EncodingStrategy $encodingStrategy): void
+    {
+        $gpsSender = new GpsSender(
+            $this->pubSubClientMock,
+            $this->gpsConfigurationMock,
+            $this->serializerMock,
+            $encodingStrategy,
+        );
+
+        $envelope = EnvelopeFactory::create(new AttributesStamp([
+            EncodingStrategy::ENCODING_ATTRIBUTE => 'attacker',
+            'foo' => 'bar',
+        ]));
+        $envelopeArray = ['body' => '{}'];
+
+        $this->serializerMock
+            ->expects(static::once())
+            ->method('encode')
+            ->with($envelope)
+            ->willReturn($envelopeArray)
+        ;
+        $this->gpsConfigurationMock
+            ->expects(static::once())
+            ->method('getTopicName')
+            ->willReturn(self::TOPIC_NAME)
+        ;
+        $this->topicMock
+            ->expects(static::once())
+            ->method('publish')
+            ->with(new Message([
+                'data' => '{}',
+                'attributes' => [
+                    'foo' => 'bar',
+                    EncodingStrategy::ENCODING_ATTRIBUTE => EncodingStrategy::ENCODING_VERSION,
+                ],
+            ]))
+        ;
+        $this->pubSubClientMock
+            ->expects(static::once())
+            ->method('topic')
+            ->with(self::TOPIC_NAME)
+            ->willReturn($this->topicMock)
+        ;
+
+        self::assertSame($envelope, $gpsSender->send($envelope));
+    }
+
+    /**
+     * @return list<list<EncodingStrategy>>
+     */
+    public static function flatEncodingStrategies(): array
+    {
+        return [
+            [EncodingStrategy::Flat],
+            [EncodingStrategy::Hybrid],
+        ];
     }
 }

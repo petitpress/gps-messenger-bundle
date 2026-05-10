@@ -26,7 +26,8 @@ final class GpsReceiver implements KeepaliveReceiverInterface
     public function __construct(
         private PubSubClient $pubSubClient,
         private GpsConfigurationInterface $gpsConfiguration,
-        private SerializerInterface $serializer
+        private SerializerInterface $serializer,
+        private EncodingStrategy $encodingStrategy = EncodingStrategy::Wrapped,
     ) {
     }
 
@@ -105,18 +106,43 @@ final class GpsReceiver implements KeepaliveReceiverInterface
     /**
      * Creates Symfony Envelope from Google Pub/Sub Message.
      * It adds stamp with received native Google Pub/Sub message.
+     *
+     * In Hybrid mode the encoding format is detected per-message via the reserved
+     * EncodingStrategy::ENCODING_ATTRIBUTE Pub/Sub attribute set by Flat/Hybrid senders.
+     * Messages without it (e.g. published by older bundle versions still using the
+     * Wrapped strategy) fall through to wrapped decoding, which is the safe default.
      */
     private function createEnvelopeFromPubSubMessage(Message $message): Envelope
     {
+        if (EncodingStrategy::Flat === $this->encodingStrategy || $this->isFlatEncoded($message)) {
+            $attributes = $message->attributes();
+            unset($attributes[EncodingStrategy::ENCODING_ATTRIBUTE]);
+
+            $envelope = $this->serializer->decode([
+                'body' => $message->data(),
+                'headers' => $attributes,
+            ]);
+
+            return $envelope->with(new GpsReceivedStamp($message));
+        }
+
         try {
-            /** @var array<string, mixed> $rawData */
+            /** @var array{body: string, headers?: array<string, string>} $rawData */
             $rawData = json_decode($message->data(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $exception) {
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
-        /** @var array{body: string, headers?: array<string, string>} $rawData */
         return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
+    }
+
+    private function isFlatEncoded(Message $message): bool
+    {
+        if (EncodingStrategy::Hybrid !== $this->encodingStrategy) {
+            return false;
+        }
+
+        return $message->attribute(EncodingStrategy::ENCODING_ATTRIBUTE) === EncodingStrategy::ENCODING_VERSION;
     }
 
     public function keepalive(Envelope $envelope, ?int $seconds = null): void
