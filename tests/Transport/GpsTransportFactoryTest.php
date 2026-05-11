@@ -19,8 +19,8 @@ class GpsTransportFactoryTest extends TestCase
     public function testSupports(bool $expected, string $dsn): void
     {
         $factory = new GpsTransportFactory(
-            $this->createMock(GpsConfigurationResolverInterface::class),
-            $this->createMock(CacheItemPoolInterface::class),
+            static::createStub(GpsConfigurationResolverInterface::class),
+            static::createStub(CacheItemPoolInterface::class),
             null
         );
 
@@ -31,7 +31,7 @@ class GpsTransportFactoryTest extends TestCase
     {
         $factory = new GpsTransportFactory(
             new GpsConfigurationResolver(),
-            $this->createMock(CacheItemPoolInterface::class),
+            static::createStub(CacheItemPoolInterface::class),
             null
         );
 
@@ -48,7 +48,7 @@ class GpsTransportFactoryTest extends TestCase
                     ),
                 ],
             ],
-            $this->createMock(SerializerInterface::class)
+            static::createStub(SerializerInterface::class)
         );
 
         /** @phpstan-ignore-next-line staticMethod.alreadyNarrowedType */

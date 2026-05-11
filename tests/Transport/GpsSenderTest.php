@@ -79,7 +79,13 @@ class GpsSenderTest extends TestCase
             ->method('topic')
         ;
 
+        $this->topicMock
+            ->expects(static::never())
+            ->method('publish')
+        ;
+
         $this->gpsConfigurationMock
+            ->expects(static::once())
             ->method('shouldUseMessengerRetry')
             ->willReturn(false);
 

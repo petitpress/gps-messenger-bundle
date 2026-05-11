@@ -14,6 +14,7 @@ use PetitPress\GpsMessengerBundle\Transport\GpsReceiver;
 use PetitPress\GpsMessengerBundle\Transport\GpsSender;
 use PetitPress\GpsMessengerBundle\Transport\GpsTransport;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -22,6 +23,7 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 
+#[AllowMockObjectsWithoutExpectations]
 class GpsTransportTest extends TestCase
 {
     /**
@@ -253,7 +255,7 @@ class GpsTransportTest extends TestCase
             ->method('subscription')
             ->willReturn($subscriptionMock);
 
-        $deadLetterTopicMock = $this->createMock(Topic::class);
+        $deadLetterTopicMock = static::createStub(Topic::class);
         $this->pubSubClient
             ->expects(static::exactly(2))
             ->method('topic')
