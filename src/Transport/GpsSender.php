@@ -7,6 +7,7 @@ namespace PetitPress\GpsMessengerBundle\Transport;
 use Google\Cloud\PubSub\MessageBuilder;
 use Google\Cloud\PubSub\PubSubClient;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\AttributesStamp;
+use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use PetitPress\GpsMessengerBundle\Transport\Stamp\OrderingKeyStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\TransportException;
@@ -22,15 +23,18 @@ final class GpsSender implements SenderInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+    private DroppedRetryCopies $droppedRetryCopies;
 
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ?DroppedRetryCopies $droppedRetryCopies = null
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->droppedRetryCopies = $droppedRetryCopies ?? new DroppedRetryCopies();
     }
 
     /**
@@ -50,6 +54,11 @@ final class GpsSender implements SenderInterface
         $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
         if ($redeliveryStamp instanceof RedeliveryStamp) {
             // do not try to redeliver, message wasn't acknowledged, so let's Google Pub/Sub do its job with retry policy
+            $gpsReceivedStamp = $envelope->last(GpsReceivedStamp::class);
+            if ($gpsReceivedStamp instanceof GpsReceivedStamp) {
+                $this->droppedRetryCopies->add($gpsReceivedStamp->getGpsMessage());
+            }
+
             return $envelope;
         }
 

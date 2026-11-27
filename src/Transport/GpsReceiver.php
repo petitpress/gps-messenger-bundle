@@ -24,15 +24,18 @@ final class GpsReceiver implements ReceiverInterface
     private PubSubClient $pubSubClient;
     private GpsConfigurationInterface $gpsConfiguration;
     private SerializerInterface $serializer;
+    private DroppedRetryCopies $droppedRetryCopies;
 
     public function __construct(
         PubSubClient $pubSubClient,
         GpsConfigurationInterface $gpsConfiguration,
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
+        ?DroppedRetryCopies $droppedRetryCopies = null
     ) {
         $this->pubSubClient = $pubSubClient;
         $this->gpsConfiguration = $gpsConfiguration;
         $this->serializer = $serializer;
+        $this->droppedRetryCopies = $droppedRetryCopies ?? new DroppedRetryCopies();
     }
 
     /**
@@ -57,16 +60,23 @@ final class GpsReceiver implements ReceiverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * A message whose retry copy the sender dropped is returned to Pub/Sub, which redelivers it by its retry policy.
      */
     public function ack(Envelope $envelope): void
     {
         try {
             $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
 
-            $this->pubSubClient
-                ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->acknowledge($gpsReceivedStamp->getGpsMessage())
-            ;
+            $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
+
+            if ($this->droppedRetryCopies->remove($gpsReceivedStamp->getGpsMessage())) {
+                $subscription->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
+
+                return;
+            }
+
+            $subscription->acknowledge($gpsReceivedStamp->getGpsMessage());
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
@@ -84,6 +94,7 @@ final class GpsReceiver implements ReceiverInterface
     {
         try {
             $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
+            $this->droppedRetryCopies->remove($gpsReceivedStamp->getGpsMessage());
 
             $this->pubSubClient
                 ->subscription($this->gpsConfiguration->getSubscriptionName())
@@ -117,6 +128,7 @@ final class GpsReceiver implements ReceiverInterface
             throw new MessageDecodingFailedException($exception->getMessage(), 0, $exception);
         }
 
+        /** @var array{body: string, headers?: array<string, string>} $rawData */
         return $this->serializer->decode($rawData)->with(new GpsReceivedStamp($message));
     }
 }
