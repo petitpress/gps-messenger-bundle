@@ -152,6 +152,28 @@ petit_press_gps_messenger:
 bin/console messenger:setup-transports
 ```
 
+## Retrying failed messages
+
+The `use_messenger_retry` option decides who retries a message whose handler failed.
+
+```yaml
+# config/packages/messenger.yaml
+
+framework:
+    messenger:
+        transports:
+            gps_transport:
+                dsn: 'gps://default'
+                options:
+                    use_messenger_retry: false # optional (default: false)
+```
+
+* `false`: Pub/Sub retries it. The transport drops the retry copy that Symfony Messenger sends and returns the
+  message to Pub/Sub, which redelivers it according to the subscription's `retryPolicy`. A message that keeps failing
+  is redelivered until a `deadLetterPolicy` of the subscription stops it. Messenger's `retry_strategy` has no effect.
+* `true`: Symfony Messenger retries it. The transport publishes the retry copy and acknowledges the original, so
+  Messenger's `retry_strategy` applies. Pub/Sub has no delayed delivery, so the retries come right away.
+
 ## License
 
 This bundle is released under the [MIT License](LICENSE).

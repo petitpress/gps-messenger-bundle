@@ -12,6 +12,7 @@ use PetitPress\GpsMessengerBundle\Transport\Stamp\GpsReceivedStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\Stamp\SentForRetryStamp;
 use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
 use Symfony\Component\Messenger\Transport\Serialization\SerializerInterface;
 use Throwable;
@@ -52,16 +53,24 @@ final class GpsReceiver implements KeepaliveReceiverInterface
 
     /**
      * {@inheritdoc}
+     *
+     * Symfony Messenger acknowledges a message it sent for retry (symfony/symfony#67038). Without Messenger retry the
+     * sender drops that retry copy, so the message is returned to Pub/Sub, which redelivers it by its retry policy.
      */
     public function ack(Envelope $envelope): void
     {
         try {
             $gpsReceivedStamp = $this->getGpsReceivedStamp($envelope);
 
-            $this->pubSubClient
-                ->subscription($this->gpsConfiguration->getSubscriptionName())
-                ->acknowledge($gpsReceivedStamp->getGpsMessage())
-            ;
+            $subscription = $this->pubSubClient->subscription($this->gpsConfiguration->getSubscriptionName());
+
+            if ($this->isLeftToPubSubRetry($envelope)) {
+                $subscription->modifyAckDeadline($gpsReceivedStamp->getGpsMessage(), 0);
+
+                return;
+            }
+
+            $subscription->acknowledge($gpsReceivedStamp->getGpsMessage());
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
@@ -90,6 +99,17 @@ final class GpsReceiver implements KeepaliveReceiverInterface
         } catch (Throwable $exception) {
             throw new TransportException($exception->getMessage(), 0, $exception);
         }
+    }
+
+    private function isLeftToPubSubRetry(Envelope $envelope): bool
+    {
+        if ($this->gpsConfiguration->shouldUseMessengerRetry()) {
+            return false;
+        }
+
+        $sentForRetryStamp = $envelope->last(SentForRetryStamp::class);
+
+        return $sentForRetryStamp instanceof SentForRetryStamp && $sentForRetryStamp->isSent;
     }
 
     private function getGpsReceivedStamp(Envelope $envelope): GpsReceivedStamp
