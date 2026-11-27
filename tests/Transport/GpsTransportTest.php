@@ -66,7 +66,7 @@ class GpsTransportTest extends TestCase
     public function testAck(): void
     {
         $this->expectException(TransportException::class);
-        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+        $this->expectExceptionMessageIsOrContains('No GpsReceivedStamp found on the Envelope.');
 
         $this->subject->ack(new Envelope(new stdClass()));
     }
@@ -74,7 +74,7 @@ class GpsTransportTest extends TestCase
     public function testReject(): void
     {
         $this->expectException(TransportException::class);
-        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+        $this->expectExceptionMessageIsOrContains('No GpsReceivedStamp found on the Envelope.');
 
         $this->subject->reject(new Envelope(new stdClass()));
     }
@@ -126,7 +126,7 @@ class GpsTransportTest extends TestCase
     public function testKeepalive(): void
     {
         $this->expectException(TransportException::class);
-        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+        $this->expectExceptionMessageIsOrContains('No GpsReceivedStamp found on the Envelope.');
 
         $this->subject->keepalive(new Envelope(new stdClass()));
     }

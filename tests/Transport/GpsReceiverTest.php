@@ -170,7 +170,7 @@ class GpsReceiverTest extends TestCase
 
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage('Some error with modifying ack deadline.');
+        $this->expectExceptionMessageIsOrContains('Some error with modifying ack deadline.');
 
         $this->gpsReceiver->keepalive(
             EnvelopeFactory::create(new GpsReceivedStamp($gpsMessage)),
@@ -182,7 +182,7 @@ class GpsReceiverTest extends TestCase
     {
         $this->expectException(TransportException::class);
         $this->expectExceptionCode(0);
-        $this->expectExceptionMessage('No GpsReceivedStamp found on the Envelope.');
+        $this->expectExceptionMessageIsOrContains('No GpsReceivedStamp found on the Envelope.');
 
         $this->gpsReceiver->reject(EnvelopeFactory::create());
     }
