@@ -154,11 +154,11 @@ final class GpsConfigurationResolver implements GpsConfigurationResolverInterfac
             $dnsOptions['topic']['name'] = substr($dnsPathOption, 1);
         }
 
-        if (isset($dnsOptions['topic']['createIfNotExist'])) {
+        if (isset($dnsOptions['topic']['createIfNotExist']) && is_string($dnsOptions['topic']['createIfNotExist'])) {
             $dnsOptions['topic']['createIfNotExist'] = $this->toBool($dnsOptions['topic']['createIfNotExist'], true);
         }
 
-        if (isset($dnsOptions['subscription']['createIfNotExist'])) {
+        if (isset($dnsOptions['subscription']['createIfNotExist']) && is_string($dnsOptions['subscription']['createIfNotExist'])) {
             $dnsOptions['subscription']['createIfNotExist'] = $this->toBool($dnsOptions['subscription']['createIfNotExist'], true);
         }
 

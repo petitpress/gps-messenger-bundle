@@ -22,8 +22,7 @@ jobs:
           - 8.4
         symfony-version:
           - 6.4.*
-          - 7.2.*
-          - 7.3.*
+          - 7.4.*
         dependencies:
           - highest
 

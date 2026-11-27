@@ -28,12 +28,13 @@ class PetitPressGpsMessengerExtensionTest extends TestCase
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    private function getSimpleConfig()
+    private function getSimpleConfig(): array
     {
         // use all defaults
-        return (new Parser())->parse('');
+        /** @var array<string, mixed> */
+        return (array) (new Parser())->parse('');
     }
 
     public function testFullConfiguration(): void
@@ -76,14 +77,15 @@ EOF;
     }
 
     /**
-     * @return mixed
+     * @return array<string, mixed>
      */
-    private function getDisabledCacheConfig()
+    private function getDisabledCacheConfig(): array
     {
         $yaml = <<<EOF
 auth_cache: false
 EOF;
 
+        /** @var array<string, mixed> */
         return (new Parser())->parse($yaml);
     }
 }
